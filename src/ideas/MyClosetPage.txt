@@ -1,0 +1,7 @@
+Need the 3 stripes stacked on top of each other logo on the left side of the nav bar
+so whenever someone clicks on it, it shows a list of categories
+
+Need these components:
++ Categories
++ PhotoGrid
++ AddPhoto

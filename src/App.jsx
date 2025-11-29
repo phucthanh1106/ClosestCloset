@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Navbar from "./components/Navbar.jsx"
 import './index.css';
+import { Outlet, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
     <>
       <Navbar />
+      <Outlet />
     </>
   )
 }
