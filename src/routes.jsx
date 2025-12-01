@@ -1,8 +1,10 @@
-import App from "./App.jsx";
+import App from "./components/App.jsx";
 import ErrorPage from "./pages/ErrorPage.jsx";
 import About from "./pages/About.jsx";
 import MyCloset from "./pages/MyCloset.jsx";
-import CategoryPage from "./components/CategoryPage.jsx";
+import CategoryGrid from "./components/CategoryGrid.jsx";
+import { useParams } from "react-router-dom";
+
 
 const routes = [
   {
@@ -20,7 +22,7 @@ const routes = [
       },
       {
       path: "/my-closet/:categoryName", // dynamic route for each category
-      element: <CategoryPage />
+      element: <CategoryGrid />
       },
     ],
   },

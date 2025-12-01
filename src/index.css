@@ -3,16 +3,23 @@
 * {
   box-sizing: border-box;
 }
+
 body {
+  position: sticky;
   background-image: url("src/assets/riding-bridge.jpg");
   background-size: cover; 
 }
+
 button {
   cursor: pointer;
 }
 
 /* Styles for everything that belongs to the nav bar  */
 .nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 50; 
   font-family: "Google Sans Code", monospace;
   font-optical-sizing: auto;
   font-weight: 200;
@@ -25,8 +32,9 @@ button {
   padding: 0 1.5rem;
   flex-direction: row;
   border-bottom: 0.2px solid rgba(236, 235, 235, 0.207);
+  background-color: rgba(255, 255, 255, 0.25); /* semi-transparent */
+  backdrop-filter: blur(10px);                 /* frosted glass */
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.154); /* start fully transparent */
 }
 
 .nav-items {
@@ -46,12 +54,11 @@ button {
 
 .nav li {
   display: inline-block; 
-  margin-right: 1rem;
   list-style: none;
 }
 
 .nav-items > li:hover {
-  border-bottom: 1px solid rgba(0, 0, 0); /* the underline */
+  border-bottom: 2px solid rgba(0, 0, 0, 0.487); /* the underline */
 }
 
 /* Styles for the dropdown menu of My Closet */
@@ -66,13 +73,21 @@ button {
   top: 200%;
   left: 0;
   min-width: 150px;
+  max-width: 300px;
+  overflow-y: auto; 
 }
 
-.dropdown-content {
-  border-bottom: none;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  padding: 1rem 0;
+.dropdown-item {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  font-weight: 350; 
+  margin: 0.5rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dropdown-item:hover {
+  font-weight: 500;
 }
 
 .dropdown-add-btn {
@@ -80,4 +95,11 @@ button {
   border: 0.2px solid rgba(236, 235, 235, 0.198);
   background-color: white;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Styles for the item card */
+.itemcard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
