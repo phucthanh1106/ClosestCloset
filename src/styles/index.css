@@ -5,9 +5,9 @@
 }
 
 body {
-  position: sticky;
-  background-image: url("src/assets/riding-bridge.jpg");
+  background-image: url("src/assets/bird-bridge.jpg");
   background-size: cover; 
+  background-attachment: fixed;
 }
 
 button {
@@ -20,9 +20,8 @@ button {
   top: 0;
   width: 100%;
   z-index: 50; 
-  font-family: "Google Sans Code", monospace;
-  font-optical-sizing: auto;
-  font-weight: 200;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
   font-style: normal;
   font-size: 1rem;
   color: black;
@@ -45,7 +44,7 @@ button {
 
 .nav-title {
   font-family: "Shadows Into Light", cursive;
-  font-weight: 400;
+  font-weight: 700;
   font-style: normal;
   font-size: 2.2rem;
   text-align: center;
@@ -78,7 +77,6 @@ button {
 }
 
 .dropdown-item {
-  font-family: "Inter", sans-serif;
   font-size: 1rem;
   font-weight: 350; 
   margin: 0.5rem 0;
@@ -95,6 +93,7 @@ button {
   border: 0.2px solid rgba(236, 235, 235, 0.198);
   background-color: white;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
 }
 
 

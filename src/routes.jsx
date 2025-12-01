@@ -3,7 +3,6 @@ import ErrorPage from "./pages/ErrorPage.jsx";
 import About from "./pages/About.jsx";
 import MyCloset from "./pages/MyCloset.jsx";
 import CategoryGrid from "./components/CategoryGrid.jsx";
-import { useParams } from "react-router-dom";
 
 
 const routes = [

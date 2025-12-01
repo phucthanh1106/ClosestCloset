@@ -49,7 +49,7 @@ export default function CategoryGrid() {
       </div>
 
       {/* Cards container */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 justify-items-center mt-7 mb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-7 mb-7">
         {items[categoryName] && items[categoryName].map((item, index) => (
           <div>
             <ItemCard key={index} file ={item} item={{ image: URL.createObjectURL(item) }} onDelete={handleDeleteItem}/>

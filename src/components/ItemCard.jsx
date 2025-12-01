@@ -6,7 +6,7 @@ export default function ItemCard({ item, file, onDelete }) {
     
     return (
         <div 
-        className="relative w-[300px] h-[400px] group rounded-xl overflow-hidden m-7"
+        className="relative w-[150px] sm:w-[200px] md:w-[240px] lg:w-[260px] aspect-[3/4] group rounded-xl overflow-hidden m-7 mb-10"
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         >
@@ -19,7 +19,6 @@ export default function ItemCard({ item, file, onDelete }) {
                     opacity-0
                     group-hover:opacity-100
                     transition-opacity duration-300
-                    z-10 /* above image but below button */
                 "
             ></div>                    
 
