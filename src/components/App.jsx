@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import Navbar from "./Navbar.jsx"
-import '../index.css';
+import '../styles/index.css'
 import { Outlet, Route, Routes } from 'react-router-dom';
 
-function App() {
+export default function App() {
   return (
     <>
       <Navbar />
@@ -12,4 +12,3 @@ function App() {
   )
 }
 
-export default App;

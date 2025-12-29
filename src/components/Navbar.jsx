@@ -14,15 +14,13 @@ export default function Navbar() {
         {/* Right side of nav bar */}
         <ul class="nav-items">
             <li><button>Search</button></li>
-            <CustomLink to="/about">About</CustomLink>
+            <li><CustomLink to="/about">About</CustomLink></li>
         </ul>
     </nav>
 }
 
 function CustomLink({ to, children, ...props }) {
     return (
-        <li>
             <Link to={to} {...props}>{children}</Link>
-        </li>
     )
 }

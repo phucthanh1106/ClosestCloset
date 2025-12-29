@@ -1,7 +1,7 @@
 import { styled } from '@mui/material/styles';
 import { useRef } from "react";
 import Button from '@mui/material/Button';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -24,7 +24,7 @@ export default function AddPhotoButton({ addItem }) {
         role={undefined}
         variant="contained"
         tabIndex={-1}
-        startIcon={<CloudUploadIcon />}
+        startIcon={<AddPhotoAlternateIcon />}
         sx={{
             backgroundColor: '#333333',   // dark grey
             color: 'white',               // text color
@@ -33,7 +33,7 @@ export default function AddPhotoButton({ addItem }) {
             },
         }}
         >
-        Upload Images
+        Upload
         <VisuallyHiddenInput
             ref={fileInputRef}  
             type="file"

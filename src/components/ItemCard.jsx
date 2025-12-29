@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { PenLine } from "lucide-react"; // or any pen icon library
+import ItemCardForm from "./ItemCardForm.jsx";
 
-export default function ItemCard({ item, file, onDelete }) {
+export default function ItemCard({ image, item, file, onDelete, onSave }) {
     const [hover, setHover] = useState(false);
+    const [showForm, setShowForm] = useState(false);
 
     
     return (
@@ -25,8 +28,8 @@ export default function ItemCard({ item, file, onDelete }) {
 
             {/* Item card */}
             <img
-                src={item.image}
-                alt={item.name}
+                src={image.image}
+                alt={image.name}
                 className="w-full h-full overflow-hidden"
             />
 
@@ -44,6 +47,43 @@ export default function ItemCard({ item, file, onDelete }) {
             >
             ✖
             </button>
+
+            {/* Pen button */}
+            {!item.hasInfo && (
+                <button
+                    onClick={() => setShowForm(true)}
+                    className="absolute inset-0 m-auto w-12 h-12 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                >
+                    <PenLine className="w-6 h-6 text-white" />
+                </button>
+            )}
+
+            {/* Show description when item has info*/}
+            {item.hasInfo && (
+            <button
+                onClick={() => setShowForm(true)}
+                className="
+                absolute inset-0 z-20
+                flex items-center justify-center
+                px-3 text-center
+                text-white font-semibold
+                opacity-0 group-hover:opacity-100
+                transition-opacity duration-300
+                pointer-events-auto
+                "
+            >
+                <span className="line-clamp-4 text-[30px]">
+                {item.description}
+                </span>
+            </button>
+            )}
+
+            {/* Item Form */}
+            {showForm && (
+                <ItemCardForm item={item} onClose={() => setShowForm(false)} onSave={onSave} />
+            )}
+
+
 
         </div>
     );
