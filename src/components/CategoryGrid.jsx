@@ -37,7 +37,7 @@ export default function CategoryGrid() {
       const currentCategoryItems = prevItems[categoryName] || [];
       return {
         ...prevItems,
-        [categoryName]: currentCategoryItems.filter(item => item !== itemDelete),
+        [categoryName]: currentCategoryItems.filter(item => item.id !== itemDelete.id),
       };
     })
   }

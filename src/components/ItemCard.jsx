@@ -33,20 +33,6 @@ export default function ItemCard({ image, item, file, onDelete, onSave }) {
                 className="w-full h-full overflow-hidden"
             />
 
-            {/* X Button */}
-            <button
-                onClick={() => onDelete(file)}
-                className="
-                    absolute top-3 right-3
-                    rounded-full text-white 
-                    w-7 h-7 flex items-center justify-center text-sm
-                    opacity-0 group-hover:opacity-100
-                    transition
-                    z-20
-                "
-            >
-            ✖
-            </button>
 
             {/* Pen button */}
             {!item.hasInfo && (
@@ -57,6 +43,7 @@ export default function ItemCard({ image, item, file, onDelete, onSave }) {
                     <PenLine className="w-6 h-6 text-white" />
                 </button>
             )}
+
 
             {/* Show description when item has info*/}
             {item.hasInfo && (
@@ -77,6 +64,22 @@ export default function ItemCard({ image, item, file, onDelete, onSave }) {
                 </span>
             </button>
             )}
+
+            {/* X Button */}
+            <button
+                onClick={() => onDelete(item)}
+                className="
+                    absolute top-3 right-3
+                    rounded-full text-white 
+                    w-7 h-7 flex items-center justify-center text-sm
+                    opacity-0 group-hover:opacity-100
+                    transition
+                    z-20
+                "
+            >
+            ✖
+            </button>
+
 
             {/* Item Form */}
             {showForm && (

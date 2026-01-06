@@ -111,7 +111,7 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                 <div className="flex gap-2 pt-2">
                     <button
                     type="submit"
-                    className="flex-1 bg-black text-white py-2 rounded hover:bg-grey-400 transition"
+                    className="flex-1 bg-black text-white py-2 rounded hover:bg-black/70 transition"
                     >
                     Save
                     </button>
@@ -119,7 +119,7 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 bg-gray-300 py-2 rounded hover:bg-gray-400 transition"
+                    className="flex-1 bg-white py-2 rounded hover:bg-gray-200 transition"
                     >
                     Cancel
                     </button>
