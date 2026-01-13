@@ -1,9 +1,8 @@
-import App from "./components/App.jsx";
-import ErrorPage from "./pages/ErrorPage.jsx";
-import About from "./pages/About.jsx";
-import MyCloset from "./pages/MyCloset.jsx";
-import CategoryGrid from "./components/CategoryGrid.jsx";
-
+import App from "../components/App.jsx";
+import ErrorPage from "../pages/ErrorPage.jsx";
+import About from "../pages/About.jsx";
+import MyCloset from "../pages/MyCloset.jsx";
+import CategoryGrid from "../components/CategoryGrid.jsx";
 
 const routes = [
   {
