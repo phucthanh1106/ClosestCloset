@@ -5,7 +5,7 @@
 }
 
 body {
-  background-image: url("src/assets/train-japan.jpg");
+  background-image: url("/train-japan.jpg");
   background-size: cover; 
   background-attachment: fixed;
 }
@@ -80,7 +80,6 @@ button {
   top: 200%;
   left: 0;
   min-width: 150px;
-  max-width: 300px;
   overflow-y: auto; 
 }
 
@@ -93,7 +92,7 @@ button {
 }
 
 .dropdown-item:hover {
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .dropdown-add-btn {
@@ -109,4 +108,11 @@ button {
 .itemcard:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.playwrite-vn {
+  font-family: "Playwrite VN", cursive;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
 }

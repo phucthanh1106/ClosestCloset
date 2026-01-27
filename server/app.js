@@ -2,13 +2,15 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
 
-// Importing schemas
-import Categories from "./models/categories.js"
-
+// Importing routers
+import categoriesRouter from "./routes/categoriesRouter.js";
 
 const app = express();
 app.use(express.json());
 dotenv.config(); // Load the variables from .env
+
+// Mounting middlewares
+app.use("/api/categories", categoriesRouter);
 
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;
@@ -25,28 +27,5 @@ const connectDB = async () => {
 };
 
 connectDB();
-
-
-// Mongoose and Mongo routes
-app.get("/api/categories", async (req, res) => {
-    try {
-        const categories = await Categories.find().sort({ name: 1});
-        res.json(categories);
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch categories" });
-    }
-});
-
-
-app.post("/api/categories", async (req, res) => {
-    try {
-        const category = new Categories(req.body);
-        const savedCategory = await category.save();
-
-        res.status(201).json(savedCategory);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 

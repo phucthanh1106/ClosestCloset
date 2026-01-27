@@ -31,7 +31,12 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
     // Function to add a new category to the dropdown menu
     const addCategory = async () => {
-        const newCategory = prompt("Enter a new category name:");
+        let newCategory = prompt("Enter a new category name with less than 20 characters: ");
+
+        while (newCategory.length > 20) {
+            alert("Category name must be at most 20 characters");
+            newCategory = prompt("Enter a new category name with less than 20 characters: ");
+        }
 
         // Check for existed duplicates
         const exists = categories.some(
@@ -41,12 +46,12 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         if (exists) {
             alert("This category already exists");
             return;
-        }
+        } 
 
         // Sending new category to db
         try {
             const response = await fetch('/api/categories', {
-                method: 'POST',
+                method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newCategory }),
             });
@@ -62,7 +67,32 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         } catch (err) {
             console.error("Error adding category", err);
         }
-    }
+    };
+
+    // Function to handle delete a category
+    const deleteCategory = async (itemId, e) => {
+        const endpoint = `/api/categories/${itemId}`; // IMPORTANT!!!!: Use `` as "" and '' are just plain strings
+        // Check for user's confirmation first
+        if (!window.confirm("Are you sure you want to delete this category?")) return;
+        
+        try {
+            const response = await fetch(endpoint, {
+                method: "DELETE",
+            });
+
+            // Check conditions of the response
+            if (response.ok) {
+                setCategories(((prev) => prev.filter((cat) => cat._id !== itemId)))
+            } else {
+                const errorMessage = await response.json();
+                console.error(errorMessage);
+                alert("Could not delete category");
+            }
+        } catch (err) {
+            console.error("Delete request failed: ", err);
+            alert("Couldn't delete the category, check your connection!");
+        }
+    };
 
     const toggleDropdown = () => {
         setShowDropdown(!showDropdown);
@@ -82,13 +112,21 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
             {showDropdown && (
                 <ul className="dropdown-menu">
                     {categories.map((item) => (
-                        <li key={item._id}>
+                        <li key={item._id} className="group relative flex items-center justify-between w-full">
                             <Link 
-                                className="dropdown-item" 
-                                to={`${basePath}/${item.name.toLowerCase().replace(/\s+/g, "-")}`}
+                                className="dropdown-item pr-12 font-nerko" 
+                                to={`${basePath}/${item.name.replace(/\s+/g, "-")}`}
                             >
                                 {item.name}
                             </Link>
+
+                            {/* The "X" Button */}
+                            <button 
+                                onClick={(e) => deleteCategory(item._id, e)}
+                                className="absolute right-0 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-black hover:font-bold px-2 transition-opacity duration-200"
+                            >
+                                ✕ 
+                            </button>
                         </li>
                     ))}
 
@@ -97,5 +135,4 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
             )}
         </div>
     );
-
 }

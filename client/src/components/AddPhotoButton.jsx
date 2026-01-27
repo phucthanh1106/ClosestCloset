@@ -44,7 +44,7 @@ export default function AddPhotoButton({ addItem }) {
                 if (files.length === 0) return;
 
                 // Filter only jpg/png files (extra safety)
-                const validFiles = files.filter((file) => file.type === "image/jpeg" || file.type === "image/png");
+                const validFiles = files.filter((file) => file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp");
 
                 // Pass valid files to parent
                 validFiles.forEach(file => addItem(file));

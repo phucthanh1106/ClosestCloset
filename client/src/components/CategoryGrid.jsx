@@ -61,7 +61,7 @@ export default function CategoryGrid() {
   return (
     <div className="w-full flex flex-col items-center pt-5">
       {/* Category name */}
-      <h1 className="text-center !important text-white text-5xl font-inherit pt-5">{categoryName.replace(/-/g, " ")}</h1>
+      <h1 className="text-center text-white text-5xl font-inherit pt-5 font-inherit">{categoryName.replace(/-/g, " ")}</h1>
 
       {/* Add Photo Button */}
       <div className="flex justify-center mt-5">
