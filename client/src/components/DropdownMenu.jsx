@@ -32,6 +32,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
     // Function to add a new category to the dropdown menu
     const addCategory = async () => {
         let newCategory = prompt("Enter a new category name with less than 20 characters: ");
+        newCategory = newCategory.replace(/[\\/]/g, "");
 
         while (newCategory.length > 20) {
             alert("Category name must be at most 20 characters");
@@ -123,7 +124,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
                             {/* The "X" Button */}
                             <button 
                                 onClick={(e) => deleteCategory(item._id, e)}
-                                className="absolute right-0 opacity-0 group-hover:opacity-100 text-gray-600 hover:text-black hover:font-bold px-2 transition-opacity duration-200"
+                                className="absolute right-0 opacity-0 group-hover:opacity-100 text-gray-800 hover:text-black hover:font-bold px-2 transition-opacity duration-200"
                             >
                                 ✕ 
                             </button>

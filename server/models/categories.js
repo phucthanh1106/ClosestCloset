@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Schemda defines the structures
 const Schema = mongoose.Schema;
 
-const categoriesSchema = new Schema({
+const categorySchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -14,6 +14,6 @@ const categoriesSchema = new Schema({
 // Models allow us to communicate with database collection
 // In other words, schema is just defining the structure but the model will wrap around that structure,
 // so that the structure can interact with the database
-const Categories = mongoose.model('Categories', categoriesSchema);
+const Categories = mongoose.model('Categories', categorySchema);
 
 export default Categories;

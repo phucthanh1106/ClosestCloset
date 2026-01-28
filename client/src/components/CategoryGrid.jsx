@@ -1,39 +1,69 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import ItemCard from "./ItemCard.jsx";
 import AddPhotoButton from "./AddPhotoButton.jsx";
 
 export default function CategoryGrid() {
-  const [items, setItems] = useState({}); // state to hold items in this category
+  const [items, setItems] = useState([]); // state to hold items in this category
+  const [categoryId, setCategoryId] = useState(null);
   const { categoryName } = useParams(); // reads the dynamic part of URL
 
-  // Handle adding new item to the category
-  const handleAddItem = (newFile) => {
-    if (!newFile) return;
+  const fetchItems = async () => {
+    try {
+      const response = await axios.get(`/api/categories/${categoryName}`);
 
-    
-    
-    setItems((prevItems) => {
-      const currentCategoryItems = prevItems[categoryName] || [];
-      const newItem = {
-        id: Date.now() + Math.random(), // simple unique id
-        file: newFile,
-        image: URL.createObjectURL(newFile),
-        description: "",
-        brand: "",
-        link: "",
-        notes: "",
-        hasInfo: false
+      if (response.status === 200) {
+        setCategoryId(response.data.category._id);
+        setItems(response.data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
       }
-
-      return {
-        ...prevItems,
-        [categoryName]: [...currentCategoryItems, newItem],
-      };
-    });
+    } catch (err) {
+      console.error("Failed to fetch images: ", err);
+    }
   }
 
-  // Removing an item
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await axios.get(`/api/categories/${categoryName}`);
+
+        if (response.status === 200) {
+          setCategoryId(response.data.category._id);
+          setItems(response.data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
+        }
+      } catch (err) {
+        console.error("Failed to fetch images: ", err);
+      }
+    }
+    fetchItems();
+  }, [categoryName]);
+
+
+  // Handle adding new image to the category
+  const handleAddItem = async (newFile) => {
+    if (!newFile) return;
+
+    try {
+      const response = await axios.post(`/api/categories/${categoryName}`, {
+            myFile: newFile,
+            category: categoryId, // This comes from your fetchCategory useEffect
+            description: "",      // Initial empty values
+            brand: "",
+            hasInfo: false
+        });
+
+
+      const savedItem = response.data;
+      if (response.status === 200) {
+        setItems((prevItems) => [...prevItems, savedItem]);
+      } 
+    } catch (err) {
+      console.error("Failed to add image to database:", err);
+      alert("Upload failed. Is the file too large?");
+    }
+  }
+
+  // Removing an image
   const handleDeleteItem = (itemDelete) => {
     setItems((prevItems) => {
       const currentCategoryItems = prevItems[categoryName] || [];
@@ -70,9 +100,9 @@ export default function CategoryGrid() {
 
       {/* Cards container */}
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-7 mb-7">
-        {items[categoryName] && items[categoryName].map((item, index) => (
+        {items.map((item) => (
           <div>
-            <ItemCard key={index} item={item} file={item.file} image={{ image: URL.createObjectURL(item.file) }} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
+            <ItemCard key={item._id} item={item} image={item.myFile} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
           </div>
         ))  
         }
