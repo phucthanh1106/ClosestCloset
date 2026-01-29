@@ -60,6 +60,7 @@ export default function AddPhotoButton({ addItem }) {
                 const validFiles = files.filter((file) => file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp");
 
                 // Convert to base 64
+                // IMPORTANT!!!: Use a for loop instead of using forEach since forEach does not support async 
                 for (const file of validFiles) {
                     try {
                         const base64 = await convertToBase64(file);

@@ -1,5 +1,8 @@
 - Finished:
-
++ When an user hovers over the item card, if it hasn't had any description,
+include a white icon of editing (a pen) and when they click on it, they can
+provide the description. However, if it already has some description, show 
+the summary.
 
 
 - Unfinished:
@@ -10,15 +13,12 @@ show the item on the left side and description on right side
 
 + Search button
 
-+ Bottom part of the page to show some information
-
-+ When an user hovers over the item card, if it hasn't had any description,
-include a white icon of editing (a pen) and when they click on it, they can
-provide the description. However, if it already has some description, show 
-the summary (maybe call some AI API to summrize the description)
++ Bottom part of the page to show some information/About page
 
 + A large white rectangle button in the middle of the homepage to leads the user
 to their closet
+
++ Paste an image onto the screen and it will automatically be uploaded to the closet
 
 
 

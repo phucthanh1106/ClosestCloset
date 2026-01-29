@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import ItemCard from "./ItemCard.jsx";
 import AddPhotoButton from "./AddPhotoButton.jsx";
 
@@ -9,32 +8,31 @@ export default function CategoryGrid() {
   const [categoryId, setCategoryId] = useState(null);
   const { categoryName } = useParams(); // reads the dynamic part of URL
 
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get(`/api/categories/${categoryName}`);
-
-      if (response.status === 200) {
-        setCategoryId(response.data.category._id);
-        setItems(response.data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
-      }
-    } catch (err) {
-      console.error("Failed to fetch images: ", err);
-    }
-  }
-
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get(`/api/categories/${categoryName}`);
+        // const responseForId = await fetch("/api/categories/");
 
-        if (response.status === 200) {
-          setCategoryId(response.data.category._id);
-          setItems(response.data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
+        // if (!responseForId.ok) {
+        //   throw new Error("Failed to fetch categories");
+        // } 
+
+        // const id = responseForId.json()._id;
+        const response = await fetch(`/api/categories/${categoryName}`);
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // Updating states
+          setCategoryId(data.category._id);
+          setItems(data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
         }
       } catch (err) {
         console.error("Failed to fetch images: ", err);
       }
     }
+    
+
     fetchItems();
   }, [categoryName]);
 
@@ -44,19 +42,27 @@ export default function CategoryGrid() {
     if (!newFile) return;
 
     try {
-      const response = await axios.post(`/api/categories/${categoryName}`, {
+      const response = await fetch(`/api/categories/${categoryName}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // Required for the server to "see" your data
+        },
+        body: JSON.stringify({
             myFile: newFile,
             category: categoryId, // This comes from your fetchCategory useEffect
             description: "",      // Initial empty values
             brand: "",
             hasInfo: false
-        });
+        }),
+      });
 
+      const savedItem = await response.json();
 
-      const savedItem = response.data;
-      if (response.status === 200) {
+      if (response.ok) {
         setItems((prevItems) => [...prevItems, savedItem]);
-      } 
+      } else {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
     } catch (err) {
       console.error("Failed to add image to database:", err);
       alert("Upload failed. Is the file too large?");

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -5,6 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 export default function DropdownMenu({ label, items, addBool, basePath }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [categories, setCategories] = useState(items);
+    const navigate = useNavigate();
 
     // Use location to detect where the user is
     const location = useLocation();
@@ -83,7 +85,10 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
             // Check conditions of the response
             if (response.ok) {
-                setCategories(((prev) => prev.filter((cat) => cat._id !== itemId)))
+                setCategories(((prev) => prev.filter((cat) => cat._id !== itemId)));
+
+                // Navigate the user back to the main page
+                navigate("/my-closet");
             } else {
                 const errorMessage = await response.json();
                 console.error(errorMessage);

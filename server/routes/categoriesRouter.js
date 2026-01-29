@@ -7,8 +7,8 @@ const categoriesRouter = express.Router();
 // Returning categories to the dropdown menu
 categoriesRouter.get("/", async (req, res) => {
     try {
-        const category = await Categories.find().sort({ name: 1});
-        res.json(category);
+        const categories = await Categories.find().sort({ name: 1});
+        res.json(categories);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch categories" });
     }
@@ -36,10 +36,15 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
         const { categoryId } = req.params;
 
         const deletedCategory = await Categories.findByIdAndDelete(categoryId);
+        const deletedItem = await ItemCards.deleteMany({ category: categoryId})
 
         if (!deletedCategory) {
             return res.status(404).json({ error: "Category not found in database" });
         } 
+
+        if (!deletedItem) {
+            return res.status(404).json({ error: "Item not found in database" });
+        }
 
         res.status(200).json({ message: "Category deleted successfully" });
     } catch (err) {
@@ -49,10 +54,22 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
 });
 
 
+// Returning the category item from mongodb to the frontend
+// categoriesRouter.get("/:categoryId", async (req, res) => {
+//     try {
+//         const { categoryId } = req.params;
+//         const category = await Categories.findById(categoryId)
+
+//         res.json(category);
+//     } catch (err) {
+//         res.status(500).json({ error: "Failed to return category" });
+//     }
+// });
+
+
 // Getting images from a category
 categoriesRouter.get("/:categoryName", async (req, res) => {
     try {
-        // Get the name of the category based on the URL
         const cleanName = req.params.categoryName.replace(/-/g, " ");
 
         // Use the category's name to find information (id) about that category in the database 
