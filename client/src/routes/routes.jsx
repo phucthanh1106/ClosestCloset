@@ -19,7 +19,7 @@ const routes = [
         element: <About />,
       },
       {
-      path: "/my-closet/:categoryName", // dynamic route for each category
+      path: "/my-closet/:categoryId", // dynamic route for each category
       element: <CategoryGrid />
       },
     ],

@@ -68,17 +68,19 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
 
 
 // Getting images from a category
-categoriesRouter.get("/:categoryName", async (req, res) => {
+categoriesRouter.get("/:categoryId", async (req, res) => {
     try {
-        const cleanName = req.params.categoryName.replace(/-/g, " ");
+        const { categoryId } = req.params;
 
-        // Use the category's name to find information (id) about that category in the database 
-        const category = await Categories.findOne({ name: cleanName });
-
-        if (!category) return res.status(404).json({ error: "Not found" });
+        // Find the category item
+        const category = await Categories.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ error: "Category not found" });
+        }
+        const categoryName = category.name;
         
-        const items = await ItemCards.find({ category: category._id }).sort({ createdAt: -1 });
-        res.json({ category, items });
+        const items = await ItemCards.find({ category: categoryId }).sort({ createdAt: -1 });
+        res.json({ categoryName, items });
     } catch (err) {
         res.status(500).json({ error: "Failed to get images" })
     }
@@ -86,7 +88,7 @@ categoriesRouter.get("/:categoryName", async (req, res) => {
 
 
 // Adding images to a category
-categoriesRouter.post("/:categoryName", async (req, res) => {
+categoriesRouter.post("/:categoryId", async (req, res) => {
     try {
         const newItem = new ItemCards(req.body);
         const savedItem = await newItem.save();

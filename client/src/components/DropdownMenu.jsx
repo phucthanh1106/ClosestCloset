@@ -121,7 +121,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
                         <li key={item._id} className="group relative flex items-center justify-between w-full">
                             <Link 
                                 className="dropdown-item pr-12 font-nerko" 
-                                to={`${basePath}/${item.name.replace(/\s+/g, "-")}`}
+                                to={`${basePath}/${item._id.toString()}`}
                             >
                                 {item.name}
                             </Link>

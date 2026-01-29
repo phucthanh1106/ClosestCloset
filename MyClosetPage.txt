@@ -6,10 +6,11 @@ the summary.
 
 
 - Unfinished:
-+ Background remover when the user uploads images (train an AI model for this)
++ Background remover when the user uploads images 
 
-+ When an user clicks on the item card, blur the background and 
-show the item on the left side and description on right side
++ When users upload a horizontal image (or maybe images of any sizes), give them the ability to crop it the way they want.
+
++ When an user clicks on the item card, blur the background and show the item on the left side and description on right side
 
 + Search button
 
@@ -18,7 +19,7 @@ show the item on the left side and description on right side
 + A large white rectangle button in the middle of the homepage to leads the user
 to their closet
 
-+ Paste an image onto the screen and it will automatically be uploaded to the closet
++ Paste an image onto the screen and it will automatically be uploaded to the user's closet
 
 
 

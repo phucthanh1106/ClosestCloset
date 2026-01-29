@@ -5,8 +5,8 @@ import AddPhotoButton from "./AddPhotoButton.jsx";
 
 export default function CategoryGrid() {
   const [items, setItems] = useState([]); // state to hold items in this category
-  const [categoryId, setCategoryId] = useState(null);
-  const { categoryName } = useParams(); // reads the dynamic part of URL
+  const [categoryName, setCategoryName] = useState("");
+  const { categoryId } = useParams(); // reads the dynamic part of URL
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -18,13 +18,14 @@ export default function CategoryGrid() {
         // } 
 
         // const id = responseForId.json()._id;
-        const response = await fetch(`/api/categories/${categoryName}`);
+        const response = await fetch(`/api/categories/${categoryId}`);
 
         if (response.ok) {
           const data = await response.json();
 
           // Updating states
-          setCategoryId(data.category._id);
+          setCategoryName(data.categoryName);
+          console.log("name", data.categoryName);
           setItems(data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
         }
       } catch (err) {
@@ -34,7 +35,7 @@ export default function CategoryGrid() {
     
 
     fetchItems();
-  }, [categoryName]);
+  }, [categoryId]);
 
 
   // Handle adding new image to the category
@@ -42,7 +43,7 @@ export default function CategoryGrid() {
     if (!newFile) return;
 
     try {
-      const response = await fetch(`/api/categories/${categoryName}`, {
+      const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Required for the server to "see" your data
@@ -72,10 +73,10 @@ export default function CategoryGrid() {
   // Removing an image
   const handleDeleteItem = (itemDelete) => {
     setItems((prevItems) => {
-      const currentCategoryItems = prevItems[categoryName] || [];
+      const currentCategoryItems = prevItems[categoryId] || [];
       return {
         ...prevItems,
-        [categoryName]: currentCategoryItems.filter(item => item.id !== itemDelete.id),
+        [categoryId]: currentCategoryItems.filter(item => item.id !== itemDelete.id),
       };
     })
   }
@@ -83,10 +84,10 @@ export default function CategoryGrid() {
   // Save the form info for an item
   const handleSaveItemInfo = (updatedItem) => {
     setItems((prevItems) => {
-      const currentCategoryItems = prevItems[categoryName] || [];
+      const currentCategoryItems = prevItems[categoryId] || [];
       return {
         ...prevItems,
-        [categoryName]: currentCategoryItems.map(item => 
+        [categoryId]: currentCategoryItems.map(item => 
           item.id === updatedItem.id ? updatedItem : item
         )
       };
