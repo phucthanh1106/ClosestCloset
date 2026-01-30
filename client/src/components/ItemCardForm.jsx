@@ -1,28 +1,60 @@
-import { useState } from "react";
-import { useForm} from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 export default function ItemCardForm({ item, onClose, onSave }) {
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             description: item.description || "",
             brand: item.brand || "",
-            link: item.link || "",
-            notes: item.notes || ""
+            url: item.url || "",
+            notes: item.notes || "",
+            hasInfo: item.hasInfo
         }
     });
 
 
-
     // handleSubmit handles the form; onSubmit handles your app logic
     // data is an object whose keys are the names you passed to register, and whose values are the current input values
-    const onSubmit = (data) => {
-        const updatedItem = {
-            ...item,
-            ...data,
-            hasInfo: true
-        };
-        onSave(updatedItem);
-        onClose();
+    const onSubmit = async (data) => {
+        try {
+            const updatedItem = {
+                ...item,
+                ...data,
+                hasInfo: true
+            };
+
+            const categoryId = item.category.toString();
+            const itemId = item._id;
+            console.log(itemId);
+            console.log(categoryId);
+            console.log(data.description);
+
+
+            const response = await fetch(`/api/categories/${categoryId}/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                'Content-Type': 'application/json', // Required for the server to "see" your data
+                },
+                body: JSON.stringify({
+                    file: item.file,
+                    category: categoryId, 
+                    description: data.description,      
+                    brand: data.brand,
+                    url: data.url,
+                    notes: data.notes,
+                    hasInfo: true
+                }),
+            })
+
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+
+            onSave(updatedItem);
+            onClose();
+        } catch (err) {
+            console.error("Failed to save item's info to database:", err);
+            alert("Save info failed!");
+        }
     }
 
     
@@ -73,14 +105,14 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     />
                 </div>
 
-                {/* Link */}
+                {/* url */}
                 <div>
                     <label className="block text-sm font-medium mb-1">
-                    Link
+                    URL
                     </label>
                     <input
                     type="url"
-                    {...register("link", {
+                    {...register("url", {
                         pattern: {
                         value: /^https?:\/\/.+/i,
                         message: "Must be a valid URL"
@@ -88,9 +120,9 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     })}
                     className="w-full p-2 border rounded text-sm"
                     />
-                    {errors.link && (
+                    {errors.url && (
                     <p className="text-red-500 text-xs mt-1">
-                        {errors.link.message}
+                        {errors.url.message}
                     </p>
                     )}
                 </div>

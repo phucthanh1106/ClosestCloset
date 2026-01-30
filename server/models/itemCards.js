@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const itemCardSchema = new Schema({
-    myFile: String,
+    file: String,
 
 
     category: {
@@ -13,8 +13,14 @@ const itemCardSchema = new Schema({
     required: true                       // Every item MUST belong to a category
     },
 
-    description: String,      
+    description: {
+        type: String,
+        default: "",
+    },    
+      
     brand: String,
+    url: String, 
+    notes: String,
     hasInfo: Boolean
 }, { timestamps: true }); 
 

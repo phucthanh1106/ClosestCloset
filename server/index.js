@@ -8,12 +8,12 @@ import categoriesRouter from "./routes/categoriesRouter.js";
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-dotenv.config(); // Load the variables from .env
 
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
 
 // Connect to MongoDB
+dotenv.config(); // Load the variables from .env
 const dbURI = process.env.MONGO_URI;
 const connectDB = async () => {
     try {

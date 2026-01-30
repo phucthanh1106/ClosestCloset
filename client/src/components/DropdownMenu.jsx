@@ -73,8 +73,8 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
     };
 
     // Function to handle delete a category
-    const deleteCategory = async (itemId, e) => {
-        const endpoint = `/api/categories/${itemId}`; // IMPORTANT!!!!: Use `` as "" and '' are just plain strings
+    const deleteCategory = async (catId, e) => {
+        const endpoint = `/api/categories/${catId}`; // IMPORTANT!!!!: Use `` as "" and '' are just plain strings
         // Check for user's confirmation first
         if (!window.confirm("Are you sure you want to delete this category?")) return;
         
@@ -85,7 +85,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
             // Check conditions of the response
             if (response.ok) {
-                setCategories(((prev) => prev.filter((cat) => cat._id !== itemId)));
+                setCategories(((prev) => prev.filter((cat) => cat._id !== catId)));
 
                 // Navigate the user back to the main page
                 navigate("/my-closet");

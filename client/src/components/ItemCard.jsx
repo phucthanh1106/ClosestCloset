@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PenLine } from "lucide-react"; // or any pen icon library
 import ItemCardForm from "./ItemCardForm.jsx";
 
-export default function ItemCard({ image, item, onDelete, onSave }) {
+export default function ItemCard({ image, item, itemId, onDelete, onSave }) {
     const [hover, setHover] = useState(false);
     const [showForm, setShowForm] = useState(false);
 
@@ -67,7 +67,7 @@ export default function ItemCard({ image, item, onDelete, onSave }) {
 
             {/* X Button */}
             <button
-                onClick={() => onDelete(item)}
+                onClick={() => onDelete(itemId)}
                 className="
                     absolute top-3 right-3
                     rounded-full text-white 

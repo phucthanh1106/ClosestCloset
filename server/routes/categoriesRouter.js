@@ -48,24 +48,10 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
 
         res.status(200).json({ message: "Category deleted successfully" });
     } catch (err) {
-        console.error("Delete error: ", error);
-        res.status(500).json({ error: err.message });
+        console.error("Category delete error: ", err);
+        res.status(500).json({ err: err.message });
     }
 });
-
-
-// Returning the category item from mongodb to the frontend
-// categoriesRouter.get("/:categoryId", async (req, res) => {
-//     try {
-//         const { categoryId } = req.params;
-//         const category = await Categories.findById(categoryId)
-
-//         res.json(category);
-//     } catch (err) {
-//         res.status(500).json({ error: "Failed to return category" });
-//     }
-// });
-
 
 // Getting images from a category
 categoriesRouter.get("/:categoryId", async (req, res) => {
@@ -89,6 +75,7 @@ categoriesRouter.get("/:categoryId", async (req, res) => {
 
 // Adding images to a category
 categoriesRouter.post("/:categoryId", async (req, res) => {
+    console.log("server reached");
     try {
         const newItem = new ItemCards(req.body);
         const savedItem = await newItem.save();
@@ -100,5 +87,49 @@ categoriesRouter.post("/:categoryId", async (req, res) => {
     }
 });
 
+
+// Deleting an image from the database
+categoriesRouter.delete("/:categoryId/:itemId", async (req, res) => {
+    try {
+        const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
+
+        const deletedItem = await ItemCards.findByIdAndDelete(itemId);
+
+        if (!deletedItem) {
+            return res.status(404).json({ error: "Item not found in database" });
+        }
+
+        res.status(200).json({ message: "Item deleted successfully" });
+    } catch (err) {
+        console.error("Item delete error: ", err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
+
+// Saving an image's form
+// IMPORTANT!!!: PUT is for updating information
+categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
+    console.log("server reached");
+    try {
+        const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
+        
+        // findByIdAndUpdate takes: 1. The ID, 2. The new data, 3. Options
+        const savedItem = await ItemCards.findByIdAndUpdate(
+            itemId, 
+            { $set: req.body }, // $set updates only the fields sent in req.body
+            { new: true, runValidators: true } // 'new: true' returns the modified document
+        );
+
+        if (!savedItem) {
+            return res.status(404).json({ error: "Item not found in database" });
+        }
+
+        res.status(200).json({ message: "Item saved successfully" });
+    } catch (err) {
+        console.error("Item save error: ", err);
+        res.status(500).json({ err: err.message });
+    }
+});
 
 export default categoriesRouter;

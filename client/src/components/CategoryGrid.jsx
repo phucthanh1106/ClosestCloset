@@ -9,15 +9,9 @@ export default function CategoryGrid() {
   const { categoryId } = useParams(); // reads the dynamic part of URL
 
   useEffect(() => {
+    // Getting the items from the server
     const fetchItems = async () => {
       try {
-        // const responseForId = await fetch("/api/categories/");
-
-        // if (!responseForId.ok) {
-        //   throw new Error("Failed to fetch categories");
-        // } 
-
-        // const id = responseForId.json()._id;
         const response = await fetch(`/api/categories/${categoryId}`);
 
         if (response.ok) {
@@ -49,10 +43,12 @@ export default function CategoryGrid() {
           'Content-Type': 'application/json', // Required for the server to "see" your data
         },
         body: JSON.stringify({
-            myFile: newFile,
+            file: newFile,
             category: categoryId, // This comes from your fetchCategory useEffect
             description: "",      // Initial empty values
             brand: "",
+            url: "",
+            notes: "",
             hasInfo: false
         }),
       });
@@ -66,32 +62,38 @@ export default function CategoryGrid() {
       }
     } catch (err) {
       console.error("Failed to add image to database:", err);
-      alert("Upload failed. Is the file too large?");
+      alert("Upload failed!");
     }
   }
 
   // Removing an image
-  const handleDeleteItem = (itemDelete) => {
-    setItems((prevItems) => {
-      const currentCategoryItems = prevItems[categoryId] || [];
-      return {
-        ...prevItems,
-        [categoryId]: currentCategoryItems.filter(item => item.id !== itemDelete.id),
-      };
-    })
+  const handleDeleteItem = async (itemId) => {
+    console.log(itemId);
+    console.log(categoryId);
+    // Check for user's confirmation
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+      const response = await fetch(`/api/categories/${categoryId}/${itemId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        setItems(((prevItems) => prevItems.filter((item) => item._id !== itemId)));;
+      } else {
+        const errorMessage = await response.json();
+        console.error(errorMessage);
+        alert("Could not delete category");
+      }
+    } catch (err) {
+      console.error("Delete request failed: ", err);
+      alert("Couldn't delete the item, check your connection!");
+    }
   }
 
   // Save the form info for an item
   const handleSaveItemInfo = (updatedItem) => {
-    setItems((prevItems) => {
-      const currentCategoryItems = prevItems[categoryId] || [];
-      return {
-        ...prevItems,
-        [categoryId]: currentCategoryItems.map(item => 
-          item.id === updatedItem.id ? updatedItem : item
-        )
-      };
-    })
+    setItems((prevItems) => prevItems.map(item => item._id === updatedItem._id ? updatedItem : item))
   }
 
 
@@ -109,7 +111,7 @@ export default function CategoryGrid() {
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-7 mb-7">
         {items.map((item) => (
           <div>
-            <ItemCard key={item._id} item={item} image={item.myFile} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
+            <ItemCard key={item._id} item={item} itemId={item._id.toString()} image={item.file} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
           </div>
         ))  
         }

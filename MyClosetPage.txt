@@ -21,5 +21,9 @@ to their closet
 
 + Paste an image onto the screen and it will automatically be uploaded to the user's closet
 
++ Has an option to select multiple images and delete them
+
++ Make a 3 dots symbol next to the category's name such that they can either edit the name or delete it
+
 
 
