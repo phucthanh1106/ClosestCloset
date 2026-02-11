@@ -12,15 +12,14 @@ export default function CategoryGrid() {
     // Getting the items from the server
     const fetchItems = async () => {
       try {
-        const response = await fetch(`/api/categories/${categoryId}`);
+        const response = await fetch(`/api/categories/${categoryId}/itemCards`);
 
         if (response.ok) {
           const data = await response.json();
 
           // Updating states
           setCategoryName(data.categoryName);
-          console.log("name", data.categoryName);
-          setItems(data.items); // Axios uses .data as the consistent "bucket" for whatever your backend sent back in res.json()
+          setItems(data.items); 
         }
       } catch (err) {
         console.error("Failed to fetch images: ", err);
@@ -37,7 +36,7 @@ export default function CategoryGrid() {
     if (!newFile) return;
 
     try {
-      const response = await fetch(`/api/categories/${categoryId}`, {
+      const response = await fetch(`/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Required for the server to "see" your data
@@ -74,7 +73,7 @@ export default function CategoryGrid() {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const response = await fetch(`/api/categories/${categoryId}/${itemId}`, {
+      const response = await fetch(`/api/categories/${categoryId}/itemCards/${itemId}`, {
         method: "DELETE",
       })
 
@@ -95,7 +94,6 @@ export default function CategoryGrid() {
   const handleSaveItemInfo = (updatedItem) => {
     setItems((prevItems) => prevItems.map(item => item._id === updatedItem._id ? updatedItem : item))
   }
-
 
   return (
     <div className="w-full flex flex-col items-center pt-5">

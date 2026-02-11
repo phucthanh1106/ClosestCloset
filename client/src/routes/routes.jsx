@@ -1,4 +1,4 @@
-import App from "../components/App.jsx";
+import App from "../App.jsx";
 import ErrorPage from "../pages/ErrorPage.jsx";
 import About from "../pages/About.jsx";
 import MyCloset from "../pages/MyCloset.jsx";

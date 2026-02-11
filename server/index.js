@@ -1,16 +1,22 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 // Importing routers
 import categoriesRouter from "./routes/categoriesRouter.js";
+import usersRouter from "./routes/usersRouter.js";
 
 const app = express();
+
+app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
+app.use("/api/users", usersRouter)
 
 // Connect to MongoDB
 dotenv.config(); // Load the variables from .env
@@ -20,7 +26,7 @@ const connectDB = async () => {
         // Wait for the database connection to succeed
         await mongoose.connect(dbURI);
 
-        // If connection is successful, start the server
+        // If connection is successful, start the server since we dont want our server to listen for request until the connection to db
         app.listen(4000);
     } catch (err) {
         console.error("Failed to connect to mongoDB: ", err);

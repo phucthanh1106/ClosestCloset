@@ -1,5 +1,5 @@
-import Categories from "../models/categories.js";
-import ItemCards from "../models/itemCards.js";
+import Categories from "../models/categoriesModel.js";
+import ItemCards from "../models/itemCardsModel.js";
 import express from 'express';
 
 const categoriesRouter = express.Router();
@@ -8,7 +8,7 @@ const categoriesRouter = express.Router();
 categoriesRouter.get("/", async (req, res) => {
     try {
         const categories = await Categories.find().sort({ name: 1});
-        res.json(categories);
+        res.status(200).json(categories);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch categories" });
     }
@@ -18,6 +18,7 @@ categoriesRouter.get("/", async (req, res) => {
 categoriesRouter.post("/", async (req, res) => {
     try {
         const newCategory = new Categories(req.body);
+        // Save the document in the database
         const savedCategory = await newCategory.save();
 
         res.status(201).json(savedCategory);
@@ -53,8 +54,8 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
     }
 });
 
-// Getting images from a category
-categoriesRouter.get("/:categoryId", async (req, res) => {
+// Getting items from a category
+categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
     try {
         const { categoryId } = req.params;
 
@@ -73,8 +74,8 @@ categoriesRouter.get("/:categoryId", async (req, res) => {
 });
 
 
-// Adding images to a category
-categoriesRouter.post("/:categoryId", async (req, res) => {
+// Adding items to a category
+categoriesRouter.post("/:categoryId/itemCards", async (req, res) => {
     console.log("server reached");
     try {
         const newItem = new ItemCards(req.body);
@@ -89,7 +90,7 @@ categoriesRouter.post("/:categoryId", async (req, res) => {
 
 
 // Deleting an image from the database
-categoriesRouter.delete("/:categoryId/:itemId", async (req, res) => {
+categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
     try {
         const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
 

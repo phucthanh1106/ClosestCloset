@@ -5,9 +5,11 @@
 }
 
 body {
-  background-image: url("/train-jp-night.jpg");
-  background-size: cover; 
+  background-image: url("/halinh_europe.JPG");
+  background-size: contain; 
   background-attachment: fixed;
+
+  background-size: 100% 100%;
 }
 
 button {
@@ -50,9 +52,9 @@ button {
   transform: translate(-50%, -50%);
   padding: 1.5rem 0;   
   font-family: "Shadows Into Light", cursive;
-  font-weight: 700;
+  font-weight: 800;
   font-style: normal;
-  font-size: 2.2rem;
+  font-size: 2.7rem;
   letter-spacing: 0.1em;
 }
 
