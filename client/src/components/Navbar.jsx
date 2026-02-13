@@ -12,10 +12,12 @@ export default function Navbar() {
         <CustomLink to="/" className="nav-title">ClosestCloset</CustomLink> 
 
         {/* Right side of nav bar */}
-        {/* <ul class="nav-items">
-            <li><button>Search</button></li>
+        <ul class="nav-items">
+            {/* <li><button>Search</button></li> */}
+            <li><CustomLink to="/login">Sign in</CustomLink></li>
+            {/* <li><CustomLink to="/signup">Sign up</CustomLink></li> */}
             <li><CustomLink to="/about">About</CustomLink></li>
-        </ul> */}
+        </ul>
     </nav>
 }
 

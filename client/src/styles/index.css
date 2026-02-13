@@ -16,6 +16,12 @@ button {
   cursor: pointer;
 }
 
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+
 /* Styles for everything that belongs to the nav bar  */
 .nav {
   height: 50px;
