@@ -17,6 +17,11 @@ const itemCardSchema = new Schema({
         type: String,
         default: "",
     },    
+
+    userId: {
+        type: String,
+        required: true,
+    },
       
     brand: String,
     url: String, 

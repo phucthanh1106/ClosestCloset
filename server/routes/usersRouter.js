@@ -11,5 +11,4 @@ usersRouter.post("/login", loginUser);
 // Signup route
 usersRouter.post("/signup", signupUser);
 
-
 export default usersRouter;

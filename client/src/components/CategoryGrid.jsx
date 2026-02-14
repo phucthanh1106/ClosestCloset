@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuthContext } from "../hooks/useAuthContext.js";
 import ItemCard from "./ItemCard.jsx";
 import AddPhotoButton from "./AddPhotoButton.jsx";
 
@@ -7,12 +8,17 @@ export default function CategoryGrid() {
   const [items, setItems] = useState([]); // state to hold items in this category
   const [categoryName, setCategoryName] = useState("");
   const { categoryId } = useParams(); // reads the dynamic part of URL
+  const { user } = useAuthContext();
 
   useEffect(() => {
     // Getting the items from the server
     const fetchItems = async () => {
       try {
-        const response = await fetch(`/api/categories/${categoryId}/itemCards`);
+        const response = await fetch(`/api/categories/${categoryId}/itemCards`, {
+          headers: {
+            "Authorization": `Bearer ${user.token}`
+          }
+        });
 
         if (response.ok) {
           const data = await response.json();
@@ -25,13 +31,14 @@ export default function CategoryGrid() {
         console.error("Failed to fetch images: ", err);
       }
     }
-    
 
-    fetchItems();
-  }, [categoryId]);
+    if (user) {
+      fetchItems();
+    }
+  }, [categoryId, user]);
 
 
-  // Handle adding new image to the category
+  // Handle adding new image to the grid
   const handleAddItem = async (newFile) => {
     if (!newFile) return;
 
@@ -40,11 +47,13 @@ export default function CategoryGrid() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Required for the server to "see" your data
+          "Authorization": `Bearer ${user.token}`,
         },
         body: JSON.stringify({
             file: newFile,
             category: categoryId, // This comes from your fetchCategory useEffect
             description: "",      // Initial empty values
+            userId: user.id,
             brand: "",
             url: "",
             notes: "",
@@ -67,14 +76,15 @@ export default function CategoryGrid() {
 
   // Removing an image
   const handleDeleteItem = async (itemId) => {
-    console.log(itemId);
-    console.log(categoryId);
     // Check for user's confirmation
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
       const response = await fetch(`/api/categories/${categoryId}/itemCards/${itemId}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+        }
       })
 
       if (response.ok) {
@@ -98,7 +108,7 @@ export default function CategoryGrid() {
   return (
     <div className="w-full flex flex-col items-center pt-5">
       {/* Category name */}
-      <h1 className="text-center text-black text-5xl font-inherit pt-5 font-inherit">{categoryName.replace(/-/g, " ")}</h1>
+      <h1 className="text-center font-[650] text-black text-5xl font-poppins pt-5 ">{categoryName.replace(/-/g, " ")}</h1>
 
       {/* Add Photo Button */}
       <div className="flex justify-center mt-5">

@@ -8,7 +8,7 @@ export default function Navbar() {
     const { logout } = useLogout();
     const { user } = useAuthContext();
     const navigate = useNavigate();
-    
+
     const handleClick = () => {
         logout();
         navigate("/login");
@@ -16,8 +16,13 @@ export default function Navbar() {
 
     return <nav className="nav">
         {/* Left side of nav bar */}
+        {user && (
+            <ul class="nav-items">
+                <li><DropdownMenu label="My Closet" items={[]} addBool={true} basePath={user.id}></DropdownMenu></li>
+            </ul>
+        )}
         <ul class="nav-items">
-            <li><DropdownMenu label="My Closet" items={[]} addBool={true} basePath="my-closet"></DropdownMenu></li>
+            <li><DropdownMenu label="" items={[]} addBool={true}></DropdownMenu></li>
         </ul>
 
         {/* Middle part (title) of nav bar */}
@@ -29,7 +34,7 @@ export default function Navbar() {
             {user && (
                 <>
                 {/* <li><CustomLink to="/about">About</CustomLink></li> */}
-                <li>{user.email}</li>
+                <div>{user.email}</div>
                 <li>
                     <button 
                         onClick={handleClick}
@@ -50,7 +55,6 @@ export default function Navbar() {
             {!user && (
                 <>
                     <li><CustomLink to="/login">Sign in</CustomLink></li>
-                    {/* <li><CustomLink to="/about">About</CustomLink></li> */}
                 </>
             )}
         </ul>

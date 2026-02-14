@@ -15,18 +15,19 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        toast.dismiss();
 
         const loginError = await login(email, password);
 
         if (loginError != null) {
             toast.error(loginError, {
-                id: "signup-status"
+                id: "login-status"
             });
         } else {
             toast.success('Login successfully!', {
-                id: "signup-status"
+                id: "login-status"
             })
-            navigate("/my-closet");
+            navigate("/");
         }
     };
 

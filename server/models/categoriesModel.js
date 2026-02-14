@@ -9,6 +9,10 @@ const categorySchema = new Schema({
         required: true,
         trim: true,  
     },
+    userId: {
+        type: String,
+        required: true,
+    }
 }, { timestamps: true });
 
 // Models allow us to communicate with database collection

@@ -2,10 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuthContext } from "../hooks/useAuthContext.js"
+
 
 export default function DropdownMenu({ label, items, addBool, basePath }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [categories, setCategories] = useState(items);
+    const { user } = useAuthContext();
     const navigate = useNavigate();
 
     // Use location to detect where the user is
@@ -15,7 +18,11 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch("/api/categories");
+                const res = await fetch("/api/categories", {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
 
                 if (!res.ok) {
                     throw new Error("Failed to fetch categories");
@@ -28,8 +35,10 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
             }
         };
 
-        fetchCategories();
-    }, []);
+        if (user) {
+            fetchCategories();
+        }
+    }, [user]);
 
     // Function to add a new category to the dropdown menu
     const addCategory = async () => {
@@ -55,8 +64,14 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         try {
             const response = await fetch('/api/categories', {
                 method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newCategory }),
+                headers: { 
+                    'Content-Type': 'application/json',
+                    "Authorization": `Bearer ${user.token}`
+                },
+                body: JSON.stringify({ 
+                    name: newCategory,
+                    userId: user.id,
+                }),
             });
 
             const createdCategory = await response.json();
@@ -64,6 +79,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
             // Check conditions of the response
             if (response.ok) {
                 setCategories([...categories, createdCategory]);
+                navigate(`/${user.id}/${createdCategory._id}`);
             } else {
                 throw new Error("Failed to save category");
             }
@@ -81,6 +97,9 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         try {
             const response = await fetch(endpoint, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${user.token}`
+                }
             });
 
             // Check conditions of the response
@@ -101,19 +120,26 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
     };
 
     const toggleDropdown = () => {
-        setShowDropdown(!showDropdown);
+        if (location.pathname === "/") {
+            navigate(`/${user.id}`);
+        }
+        
+        if (user) {
+            setShowDropdown(!showDropdown);
+        }
     };
 
     
     return (
         <div>
             {/* Handle the button toggling instead of going to my closet every time */}
-            {location.pathname === "/" 
+            {/* {location.pathname === "/" && user
             ? <Link to="/my-closet"><button className="dropdown-button" onClick={toggleDropdown}>{label}</button></Link>
             : <button className="dropdown-button" onClick={toggleDropdown}>{label}</button>
-            }
+            } */}
+            <button className="dropdown-button" onClick={toggleDropdown}>{label}</button>
 
-            {showDropdown && (
+            {showDropdown && user && (
                 <ul className="dropdown-menu">
                     {categories.map((item) => (
                         <li key={item._id} className="group relative flex items-center justify-between w-full">

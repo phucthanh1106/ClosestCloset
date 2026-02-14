@@ -16,7 +16,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
-app.use("/api/users", usersRouter)
+app.use("/api/users", usersRouter);
 
 // Connect to MongoDB
 dotenv.config(); // Load the variables from .env

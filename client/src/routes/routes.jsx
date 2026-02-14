@@ -21,7 +21,7 @@ const routes = [
         element: <Signup />,
       },
       {
-        path: "/my-closet",
+        path: "/:userId",
         element: <MyCloset />,
       },
       {
@@ -29,7 +29,7 @@ const routes = [
         element: <About />,
       },
       {
-      path: "/my-closet/:categoryId", // dynamic route for each category
+      path: "/:userId/:categoryId", // dynamic route for each category
       element: <CategoryGrid />
       },
     ],

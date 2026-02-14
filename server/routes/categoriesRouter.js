@@ -1,20 +1,26 @@
 import Categories from "../models/categoriesModel.js";
 import ItemCards from "../models/itemCardsModel.js";
 import express from 'express';
+import requireAuth from "../middlewares/requireAuth.js"
 
 const categoriesRouter = express.Router();
 
-// Returning categories to the dropdown menu
+// This is placed at the top because we want to protect everything below
+categoriesRouter.use(requireAuth);
+
+// GET all categories to the dropdown menu
 categoriesRouter.get("/", async (req, res) => {
+    const id = req.user.id;
+
     try {
-        const categories = await Categories.find().sort({ name: 1});
+        const categories = await Categories.find({ userId: id }).sort({ createdAt: -1 });
         res.status(200).json(categories);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch categories" });
     }
 });
 
-// Adding new category to the dropdown menu
+// POST new category to the dropdown menu
 categoriesRouter.post("/", async (req, res) => {
     try {
         const newCategory = new Categories(req.body);
@@ -27,7 +33,7 @@ categoriesRouter.post("/", async (req, res) => {
     }
 });
 
-// Deleting a category 
+// DELETE a category 
 // IMPORTANT!!!: "/:id" from the first line must match { id } from the req.params
 // /:id tells Express: "Anything that comes after the slash is a variable I want to store in req.params
 // If the URL is /api/categories/123, then req.params.id will be 123
@@ -54,7 +60,7 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
     }
 });
 
-// Getting items from a category
+// GET items from a category
 categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
     try {
         const { categoryId } = req.params;
@@ -74,7 +80,7 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
 });
 
 
-// Adding items to a category
+// POST items to a category
 categoriesRouter.post("/:categoryId/itemCards", async (req, res) => {
     console.log("server reached");
     try {
@@ -89,12 +95,15 @@ categoriesRouter.post("/:categoryId/itemCards", async (req, res) => {
 });
 
 
-// Deleting an image from the database
+// DELETE an image from the database
 categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
     try {
         const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
-
-        const deletedItem = await ItemCards.findByIdAndDelete(itemId);
+        const { userId } = req.user.id;
+        const deletedItem = await ItemCards.findByIdAndDelete({
+            _id: itemId, 
+            userId: userId  // The 'Lock'
+        });
 
         if (!deletedItem) {
             return res.status(404).json({ error: "Item not found in database" });
@@ -108,7 +117,7 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
 });
 
 
-// Saving an image's form
+// PUT (save) an image's form
 // IMPORTANT!!!: PUT is for updating information
 categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
     console.log("server reached");

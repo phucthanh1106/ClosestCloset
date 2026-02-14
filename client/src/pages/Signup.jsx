@@ -25,7 +25,6 @@ export default function Signup() {
             toast.success('Account created successfully!', {
                 id: "signup-status"
             })
-            navigate('/login');
         }
     };
 

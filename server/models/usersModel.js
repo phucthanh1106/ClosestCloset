@@ -31,14 +31,14 @@ userSchema.statics.signup = async function(email, password) {
     if (!validator.isEmail(email)) {
         throw Error("Email is not valid!");
     }
-    if (!validator.isStrongPassword(password)) {
-        throw Error("Password is not strong enough!");  
-    }
-
+    // Check if email exists
     const exists = await this.findOne({ email });
-
     if (exists) {
         throw Error("Email already in use!");
+    }
+    // If email doesn't exist but pwd is not strong enough
+    if (!validator.isStrongPassword(password)) {
+        throw Error("Password is not strong enough!");  
     }
 
     // Salt is like the random part after the hashed password
