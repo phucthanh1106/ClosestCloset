@@ -104,9 +104,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         setShowDropdown(!showDropdown);
     };
 
-    console.log(categories);
-
-
+    
     return (
         <div>
             {/* Handle the button toggling instead of going to my closet every time */}

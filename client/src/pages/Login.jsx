@@ -1,17 +1,33 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-
+import { useLogin } from "../hooks/useLogin";
+import toast from 'react-hot-toast';
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false)
+    const { login, error, isLoading } = useLogin();
+    const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log(email,password);
+        const loginError = await login(email, password);
+
+        if (loginError != null) {
+            toast.error(loginError, {
+                id: "signup-status"
+            });
+        } else {
+            toast.success('Login successfully!', {
+                id: "signup-status"
+            })
+            navigate("/my-closet");
+        }
     };
 
     return (
@@ -51,7 +67,7 @@ export default function Login() {
                     </button>
                 </div>
 
-                <button className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400">
+                <button disabled={isLoading} className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400">
                     Sign in
                 </button>
                 

@@ -1,20 +1,32 @@
 import { useState }  from "react";
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
-
+import { useSignup } from "../hooks/useSignup";
+import toast from 'react-hot-toast';
 
 export default function Signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const { signup, isLoading } = useSignup();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        toast.dismiss();
 
-        console.log(email,password);
+        const signupError = await signup(email, password);
 
-        navigate('/login');
+        if (signupError != null) {
+            toast.error(signupError, {
+                id: "signup-status"
+            });
+        } else {
+            toast.success('Account created successfully!', {
+                id: "signup-status"
+            })
+            navigate('/login');
+        }
     };
 
     return (
@@ -55,7 +67,10 @@ export default function Signup() {
                 </div>
 
 
-                <button className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400">
+                <button 
+                    disabled={isLoading}
+                    className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400"
+                >
                     Sign up
                 </button>
             </form>

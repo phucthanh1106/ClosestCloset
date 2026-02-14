@@ -1,4 +1,4 @@
-import { createContext, useReducer } from "react";
+import { createContext, useReducer, useEffect } from "react";
 
 // The context 
 export const AuthContext = createContext();
@@ -22,10 +22,19 @@ export const AuthContextProvider = ({ children }) => {
         user: null
     }); // The initial condition is null user since there hasnt been anyone logged in
 
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (user) {
+            dispatch({ type: "LOGIN", payload: user })
+        }
+    }, []);
+
     // This will run everytime the state changes
     console.log("AuthContext state: ", state);
 
-    // The value prop is the actual data you want to share with the rest of your application.
+    // The value prop is the actual data you want to share with the rest of your application
+    // VALUE IS ALSO CONTEXT
     // In JSX, when you want to write JavaScript inside your HTML-like tags, you must wrap it in curly braces
     return (
         <AuthContext.Provider value={{...state, dispatch}}> 
