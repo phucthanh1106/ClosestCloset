@@ -36,7 +36,7 @@ export default function App() {
                   <div className="top-[20%] text-center mr-50 ml-50">
                     <TypewriterText
                       className="fixed"
-                      text="Archive your wishlist in this digital closet"
+                      text="Archive your wishlist in your closest closet"
                       speed={50}
                       onComplete={() => setTypingDone(true)}
                     />

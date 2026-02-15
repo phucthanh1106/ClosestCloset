@@ -25,6 +25,10 @@ to their closet
 
 + Make a 3 dots symbol next to the category's name such that they can either edit the name or delete it
 
-Archive your favorite pieces
++ Make it possible to store multiple time cards in 1 main time cards
+
++ Make the homepage show case most liked items from other users or maybe showcase some articles
+
++ Make it possible for a person to make their item cards be public or private so other people can also browse their collection
 
 
