@@ -16,6 +16,9 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
     // Fetch categories
     useEffect(() => {
+        if (location.pathname === "/") {
+            setShowDropdown(false);
+        }
         const fetchCategories = async () => {
             try {
                 const res = await fetch("/api/categories", {
@@ -38,16 +41,16 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         if (user) {
             fetchCategories();
         }
-    }, [user]);
+    }, [user, location.pathname]);
 
     // Function to add a new category to the dropdown menu
     const addCategory = async () => {
-        let newCategory = prompt("Enter a new category name with less than 20 characters: ");
+        let newCategory = prompt("Enter a new category name with less than 25 characters: ");
         newCategory = newCategory.replace(/[\\/]/g, "");
 
-        while (newCategory.length > 20) {
-            alert("Category name must be at most 20 characters");
-            newCategory = prompt("Enter a new category name with less than 20 characters: ");
+        while (newCategory.length > 25) {
+            alert("Category name can't be more than 25 characters");
+            newCategory = prompt("Enter a new category name with less than 25 characters: ");
         }
 
         // Check for existed duplicates

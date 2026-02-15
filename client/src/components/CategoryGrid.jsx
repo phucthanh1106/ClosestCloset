@@ -108,7 +108,7 @@ export default function CategoryGrid() {
   return (
     <div className="w-full flex flex-col items-center pt-5">
       {/* Category name */}
-      <h1 className="text-center font-[650] text-black text-5xl font-poppins pt-5 ">{categoryName.replace(/-/g, " ")}</h1>
+      <h1 className="text-center font-[500] funnel-display text-black text-6xl pt-5 ">{categoryName.replace(/-/g, " ")}</h1>
 
       {/* Add Photo Button */}
       <div className="flex justify-center mt-5">

@@ -2,6 +2,7 @@ import { useState }  from "react";
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useSignup } from "../hooks/useSignup";
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function Signup() {
@@ -72,6 +73,10 @@ export default function Signup() {
                 >
                     Sign up
                 </button>
+
+                <p className="mt-4 text-center text-sm text-gray-500">
+                    Already have an account? <Link to="/login" className="text-blue-500 font-bold cursor-pointer hover:text-blue-400">Log in</Link>
+                </p>
             </form>
         </div>
     )

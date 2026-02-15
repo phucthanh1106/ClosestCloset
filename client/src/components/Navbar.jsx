@@ -11,7 +11,7 @@ export default function Navbar() {
 
     const handleClick = () => {
         logout();
-        navigate("/login");
+        navigate("/");
     }
 
     return <nav className="nav">
@@ -21,8 +21,9 @@ export default function Navbar() {
                 <li><DropdownMenu label="My Closet" items={[]} addBool={true} basePath={user.id}></DropdownMenu></li>
             </ul>
         )}
+
         <ul class="nav-items">
-            <li><DropdownMenu label="" items={[]} addBool={true}></DropdownMenu></li>
+            <li></li>
         </ul>
 
         {/* Middle part (title) of nav bar */}
@@ -49,14 +50,13 @@ export default function Navbar() {
                 </li>
                 </>
             )}
-            {/* <li><button>Search</button></li> */}
 
             {/* When the user hasn't logged in */}
-            {!user && (
+            {/* {!user && (
                 <>
                     <li><CustomLink to="/login">Sign in</CustomLink></li>
                 </>
-            )}
+            )} */}
         </ul>
     </nav>
 }

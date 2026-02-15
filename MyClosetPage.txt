@@ -25,5 +25,6 @@ to their closet
 
 + Make a 3 dots symbol next to the category's name such that they can either edit the name or delete it
 
+Archive your favorite pieces
 
 

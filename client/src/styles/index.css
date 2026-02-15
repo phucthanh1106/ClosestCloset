@@ -20,6 +20,27 @@ button {
   font-family: 'Poppins', sans-serif;
 }
 
+/*---------------FONTS---------------*/
+.funnel-display {
+  font-family: "Funnel Display", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 450;
+  font-style: normal;
+}
+
+.rock-3d-regular {
+  font-family: "Rock 3D", system-ui;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.shizuru-regular {
+  font-family: "Shizuru", system-ui;
+  font-weight: 500;
+  font-style: normal;
+}
+
+
 
 
 /* Styles for everything that belongs to the nav bar  */
@@ -110,6 +131,14 @@ button {
   background-color: white;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   margin-top: 5px;
+}
+
+.dropdown-button {
+  transition: transform 0.2s ease, border-bottom 0.2s ease;
+}
+
+.dropdown-button:hover {
+  transform: translateY(-2px);
 }
 
 
