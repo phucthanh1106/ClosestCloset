@@ -2,9 +2,8 @@ import Navbar from "./components/Navbar.jsx"
 import TypewriterText from "./components/TypewriterText.jsx";
 import { useAuthContext } from "./hooks/useAuthContext.js";
 import './styles/index.css'
-import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
 
 
@@ -12,6 +11,7 @@ export default function App() {
   const [typingDone, setTypingDone] = useState(false);
   const location = useLocation().pathname;
   const { user } = useAuthContext();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -50,7 +50,7 @@ export default function App() {
                   {/* Button to get to login page */}
                   <div className="flex flex-col items-center gap-6">
                       <button
-                        onClick={() => window.location.href = "/signup"}
+                        onClick={() => navigate("/signup")}
                         className={
                           `mt-[6vh] font-bold text-5xl text-[oklch(27.1%_0.105_12.094)] bg-[oklch(64.8%_0.2_131.684)]/50 [word-spacing:-0.5em] hover:bg-[oklch(64.8%_0.2_131.684)]/60 px-4 py-2 rounded-full border-4 border-[oklch(27.1%_0.105_12.094)] shadow-2xl
                           ${typingDone ? "opacity-100" : "opacity-0 pointer-events-none"}`
