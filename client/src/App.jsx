@@ -20,17 +20,21 @@ export default function App() {
         reverseOrder={false}  
         toastOptions={{
           style: {
-            marginTop: '40px', // Another way to add a "bump" down
+            marginTop: '40px', 
             background: 'oklch(25% 0.01 250)',
             color: '#fff',
             border: '1px solid rgba(255,255,255,0.1)',
             },
         }}
         />
+
       <Navbar />
+
+      {/* Text running */}
       {location==="/" && (
         <div className="flex items-center justify-center min-h-[calc(100vh-350px)] px-6">
           <div className="text-8xl flex flex-col [word-spacing:-0.5em] items-center font-black shizuru-regular text-white text-center">
+              {/* When people first visit the site */}
               {!user && (
                 <>
                   <div className="top-[20%] text-center mr-50 ml-50">
@@ -57,6 +61,8 @@ export default function App() {
                   </div>
                 </>
               )}
+
+              {/* When user is logged in */}
               {user && (
                 <TypewriterText
                   text="Welcome to your closet!"
