@@ -7,6 +7,7 @@ import cors from 'cors';
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
 
+dotenv.config(); // Load the variables from .env
 const app = express();
 
 app.use(cors());
@@ -19,17 +20,20 @@ app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
 
 // Connect to MongoDB
-dotenv.config(); // Load the variables from .env
 const dbURI = process.env.MONGO_URI;
-const connectDB = async () => {
-    try {
-        // Wait for the database connection to succeed
-        await mongoose.connect(dbURI);
+let isConnected = false;
 
-        // If connection is successful, start the server since we dont want our server to listen for request until the connection to db
-        // app.listen(4000);
+const connectDB = async (req, res, next) => {
+    if (isConnected) return next(); // Skip if already connected
+
+    try {
+        await mongoose.connect(dbURI);
+        isConnected = true;
+        console.log("MongoDB Connected");
+        next();
     } catch (err) {
         console.error("Failed to connect to mongoDB: ", err);
+        res.status(500).json({ error: "Database connection failed" });
     }
 };
 
