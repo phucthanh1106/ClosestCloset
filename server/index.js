@@ -28,7 +28,7 @@ const connectDB = async () => {
         await mongoose.connect(dbURI);
 
         // If connection is successful, start the server since we dont want our server to listen for request until the connection to db
-        app.listen(port);
+        app.listen(port, "0.0.0.0");
     } catch (err) {
         console.error("Failed to connect to mongoDB: ", err);
     }
