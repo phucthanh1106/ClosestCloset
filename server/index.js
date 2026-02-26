@@ -15,10 +15,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
-// Mounting middlewares
-app.use("/api/categories", categoriesRouter);
-app.use("/api/users", usersRouter);
-
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;
 let isConnected = false;
@@ -37,7 +33,13 @@ const connectDB = async (req, res, next) => {
     }
 };
 
-connectDB();
+// Apply connection check to all /api routes
+app.use("/api", connectDB);
+
+// Mounting middlewares
+app.use("/api/categories", categoriesRouter);
+app.use("/api/users", usersRouter);
+
 
 export default app;
 
