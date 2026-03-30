@@ -72,89 +72,89 @@ export default function ItemCardForm({ item, onClose, onSave }) {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Description */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                    Description
-                    </label>
-                    <input
-                    {...register("description", {
-                        required: "Description is required",
-                        maxLength: {
-                        value: 40,
-                        message: "Description must be at most 40 characters"
-                        }                    
-                    })}
-                    className="w-full p-2 border rounded text-sm"
-                    />
-                    {errors.description && (
-                    <p className="text-red-500 text-xs mt-1">
-                        {errors.description.message}
-                    </p>
-                    )}
-                </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                        Description
+                        </label>
+                        <input
+                        {...register("description", {
+                            required: "Description is required",
+                            maxLength: {
+                            value: 40,
+                            message: "Description must be at most 40 characters"
+                            }                    
+                        })}
+                        className="w-full p-2 border rounded text-sm"
+                        />
+                        {errors.description && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.description.message}
+                        </p>
+                        )}
+                    </div>
 
-                {/* Brand */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                    Brand
-                    </label>
-                    <input
-                    {...register("brand")}
-                    className="w-full p-2 border rounded text-sm"
-                    />
-                </div>
+                    {/* Brand */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                        Brand
+                        </label>
+                        <input
+                        {...register("brand")}
+                        className="w-full p-2 border rounded text-sm"
+                        />
+                    </div>
 
-                {/* url */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                    URL
-                    </label>
-                    <input
-                    type="url"
-                    {...register("url", {
-                        pattern: {
-                        value: /^https?:\/\/.+/i,
-                        message: "Must be a valid URL"
-                        }
-                    })}
-                    className="w-full p-2 border rounded text-sm"
-                    />
-                    {errors.url && (
-                    <p className="text-red-500 text-xs mt-1">
-                        {errors.url.message}
-                    </p>
-                    )}
-                </div>
+                    {/* url */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                        URL
+                        </label>
+                        <input
+                        type="url"
+                        {...register("url", {
+                            pattern: {
+                            value: /^https?:\/\/.+/i,
+                            message: "Must be a valid URL"
+                            }
+                        })}
+                        className="w-full p-2 border rounded text-sm"
+                        />
+                        {errors.url && (
+                        <p className="text-red-500 text-xs mt-1">
+                            {errors.url.message}
+                        </p>
+                        )}
+                    </div>
 
-                {/* Notes */}
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                    Notes
-                    </label>
-                    <textarea
-                    {...register("notes")}
-                    rows="3"
-                    className="w-full p-2 border rounded text-sm"
-                    />
-                </div>
+                    {/* Notes */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                        Notes
+                        </label>
+                        <textarea
+                        {...register("notes")}
+                        rows="3"
+                        className="w-full p-2 border rounded text-sm"
+                        />
+                    </div>
 
-                {/* Buttons */}
-                <div className="flex gap-2 pt-2">
-                    <button
-                    type="submit"
-                    className="flex-1 bg-black text-white py-2 rounded hover:bg-black/70 transition"
-                    >
-                    Save
-                    </button>
+                    {/* Buttons */}
+                    <div className="flex gap-2 pt-2">
+                        <button
+                        type="submit"
+                        className="flex-1 bg-black text-white py-2 rounded hover:bg-black/70 transition"
+                        >
+                        Save
+                        </button>
 
-                    <button
-                    type="button"
-                    onClick={onClose}
-                    className="flex-1 bg-white py-2 rounded hover:bg-gray-200 transition"
-                    >
-                    Cancel
-                    </button>
-                </div>
+                        <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 bg-white py-2 rounded hover:bg-gray-200 transition"
+                        >
+                        Cancel
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

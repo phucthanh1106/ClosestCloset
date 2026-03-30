@@ -30,7 +30,6 @@ export const useSignup = () => {
 
             // update the auth context
             dispatch({ type: 'LOGIN', payload: signupInfo });
-
             setIsLoading(false);
         }
 

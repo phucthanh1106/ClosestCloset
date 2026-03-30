@@ -8,13 +8,14 @@ export const authReducer = (state, action) => {
     switch (action.type) {
         case 'LOGIN':
             return { user: action.payload };
-        case "LOGOUT":
+        case 'LOGOUT':
             return { user: null};
         default:
             return state
     }
 }
 
+// This is a custom wrapper
 // children are the components that will be wrapped by this component => children can be the App component
 // dispatch delivers the action to the reducer and that action can be an object => dispatch({ type: 'LOGIN', payload: user })
 export const AuthContextProvider = ({ children }) => {
@@ -37,6 +38,8 @@ export const AuthContextProvider = ({ children }) => {
     // VALUE IS ALSO CONTEXT
     // In JSX, when you want to write JavaScript inside your HTML-like tags, you must wrap it in curly braces
     return (
+        // In React, whenever you put a component inside the opening and closing tags of another component, 
+        // React automatically takes everything in the middle and bundles it into a prop called children
         <AuthContext.Provider value={{...state, dispatch}}> 
             { children }
         </AuthContext.Provider>
