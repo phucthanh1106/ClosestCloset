@@ -15,7 +15,7 @@ export const useLogin = () => {
         let loginError = null;
 
         try {
-            const response = await fetch("https://closestcloset-backend.onrender.com/api/users/login", {
+            const response = await fetch("https://closestcloset-backend.onrender.com/users/login", {
                 method: 'POST',
                 headers: {"Content-type": "application/json"},
                 body: JSON.stringify({ email, password })
