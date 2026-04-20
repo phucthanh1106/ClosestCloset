@@ -14,28 +14,38 @@ export const useLogin = () => {
         // setError(null);
         let loginError = null;
 
-        const response = await fetch(`${API_BASE_URL}/api/users/login`, {
-            method: 'POST',
-            headers: {"Content-type": "application/json"},
-            body: JSON.stringify({ email, password })
-        })
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+                method: 'POST',
+                headers: {"Content-type": "application/json"},
+                body: JSON.stringify({ email, password })
+            })
 
-        const loginInfo = await response.json();
+            console.log("Login response status:", response.status);
+            console.log("Login response headers:", response.headers.get('content-type'));
 
-        if (!response.ok) {
+            const loginInfo = await response.json();
+            console.log("Login response data:", loginInfo);
+
+            if (!response.ok) {
+                setIsLoading(false);
+                // setError(loginInfo.error);
+                loginError = loginInfo.error;
+            } else {
+                localStorage.setItem("user", JSON.stringify(loginInfo));
+
+                // Update context after login successfully
+                dispatch({ type: "LOGIN", payload: loginInfo });
+
+                setIsLoading(false);
+            }
+
+            return loginError;
+        } catch (err) {
+            console.error("Login error:", err);
             setIsLoading(false);
-            // setError(loginInfo.error);
-            loginError = loginInfo.error;
-        } else {
-            localStorage.setItem("user", JSON.stringify(loginInfo));
-
-            // Update context after login successfully
-            dispatch({ type: "LOGIN", payload: loginInfo });
-
-            setIsLoading(false);
+            return err.message;
         }
-
-        return loginError;
     }
 
     return { login, error, isLoading }

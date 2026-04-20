@@ -17,6 +17,10 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        if (!process.env.SECRET) {
+            return res.status(500).json({error: "Server configuration error: SECRET not set"});
+        }
+
         const user = await Users.login(email, password);
 
         // create token
@@ -35,6 +39,10 @@ export const signupUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        if (!process.env.SECRET) {
+            return res.status(500).json({error: "Server configuration error: SECRET not set"});
+        }
+
         const user = await Users.signup(email, password);
 
         // create token
