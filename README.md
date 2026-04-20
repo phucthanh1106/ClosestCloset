@@ -4,21 +4,13 @@ A digital closet app where you can store, organize, and manage all your favorite
 
 **Live Demo:** [https://closestcloset-frontend.onrender.com/](https://closestcloset-frontend.onrender.com/)
 
+!!! Since I'm still lazy to change the UI, you need to know that your password must be at least 8 characters with at least 1 special symbol (!,@,%,...), a number and an uppercase letter (I'm not really sure but my password contained all of that and it worked).
+
 ---
 
 ## 🎯 What's This About?
 
 Ever had that moment where you came across something that you really really want to get but now you're just a broke college student earning below minimum wage from your on-campus job and you still want to save that piece of clothing somewhere in case you get an internship and suddenly feel like you're living the lavish life of a billionaire? This project serves that purpose for digitally storing your wishlist of clothes.
-
-
-## 📋 Features
-
-✅ **User Authentication** – Sign up, log in, and keep your closet private  
-✅ **Photo Upload** – Add photos of your clothing items  
-✅ **Category Organization** – Sort by jackets, shoes, pants, and more  
-✅ **Responsive Design** – Works on mobile, tablet, and desktop  
-✅ **Clean UI** – Dark theme that's easy on the eyes  
-✅ **Secure** – Your password is hashed, and your data is yours alone  
 
 ---
 
