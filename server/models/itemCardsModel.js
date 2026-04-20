@@ -6,7 +6,6 @@ const Schema = mongoose.Schema;
 const itemCardSchema = new Schema({
     file: String,
 
-
     category: {
     type: mongoose.Schema.Types.ObjectId, // Tells Mongoose this is a "Link" to another document
     ref: 'Category',                     // Tells Mongoose which Model it's linked to

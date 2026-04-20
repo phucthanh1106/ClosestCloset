@@ -8,13 +8,23 @@ import toast from 'react-hot-toast';
 export default function Signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { signup, isLoading } = useSignup();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         toast.dismiss();
+
+        // Validate passwords match
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match", {
+                id: "signup-status"
+            });
+            return;
+        }
 
         const signupError = await signup(email, password);
 
@@ -26,6 +36,7 @@ export default function Signup() {
             toast.success('Account created successfully!', {
                 id: "signup-status"
             })
+            navigate('/');
         }
     };
 
@@ -56,7 +67,7 @@ export default function Signup() {
                         placeholder="Password"
                     />
 
-                    {/* 4. The Toggle Button */}
+                    {/* Password visibility toggle */}
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
@@ -66,10 +77,40 @@ export default function Signup() {
                     </button>
                 </div>
 
+                <div className="mb-2 relative">
+                    <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        className="w-full text-m rounded-full  bg-white/8 py-3 pl-5 pr-12 text-white placeholder-white/70 outline-none"
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        value={confirmPassword}
+                        placeholder="Confirm Password"
+                    />
+
+                    {/* Confirm password visibility toggle */}
+                    <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                    >
+                        {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </button>
+                </div>
+
+                {/* Password match indicator - outside relative container */}
+                {confirmPassword && password !== confirmPassword && (
+                    <p className="text-red-400 text-sm mb-6">Passwords do not match</p>
+                )}
+                {confirmPassword && password === confirmPassword && (
+                    <p className="text-green-400 text-sm mb-6">Passwords match</p>
+                )}
+                {!confirmPassword && (
+                    <div className="mb-6"></div>
+                )}
+
 
                 <button 
-                    disabled={isLoading}
-                    className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400"
+                    disabled={isLoading || password !== confirmPassword || !password || !confirmPassword || !email}
+                    className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Sign up
                 </button>

@@ -37,6 +37,51 @@ export default function CategoryGrid() {
     }
   }, [categoryId, user]);
 
+  // Handle Ctrl+V / Cmd+V paste event
+  useEffect(() => {
+    const handlePaste = async (e) => {
+      // Check if clipboard has items
+      if (!navigator.clipboard) {
+        console.warn("Clipboard API not available");
+        return;
+      }
+
+      try {
+        // Try to read image files from clipboard
+        const items = await navigator.clipboard.read();
+        
+        for (const item of items) {
+          if (item.types.includes("image/png") || item.types.includes("image/jpeg") || item.types.includes("image/webp")) {
+            const blob = await item.getType(item.types.find(t => t.startsWith("image/")));
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+              // Send the base64 image data to handleAddItem
+              handleAddItem(event.target.result);
+            };
+            
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+
+        // If no image, try to read text (in case user pastes an image URL)
+        // const text = await navigator.clipboard.readText();
+        // if (text && (text.startsWith("http") || text.startsWith("data:"))) {
+        //   handleAddItem(text);
+        // }
+      } catch (err) {
+        console.error("Paste event failed:", err);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+
+    return () => {
+      window.removeEventListener("paste", handlePaste);
+    };
+  }, [categoryId, user]);
+
 
   // Handle adding new image to the grid
   const handleAddItem = async (newFile) => {
@@ -121,10 +166,8 @@ export default function CategoryGrid() {
           <div>
             <ItemCard key={item._id} item={item} itemId={item._id.toString()} image={item.file} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
           </div>
-        ))  
-        }
+        ))}
       </div>
-
     </div>
   );
 }

@@ -42,7 +42,7 @@ userSchema.statics.signup = async function(email, password) {
     }
 
     // Salt is like the random part after the hashed password
-    // So if the whole pw is "passwordjklmnp012" then hashed is "password" and salt is "jkl..."
+    // So if the whole hased pw is "passwordjklmnp012" then hashed is "password" and salt is "jkl..."
     // This is to add an extra layer of security so if a hacker cracks one then it doesn't mean he cracks others
     // The bigger the argument, the more secured but also longer (in time and length) that this password will be
     const salt = await bcrypt.genSalt(10);

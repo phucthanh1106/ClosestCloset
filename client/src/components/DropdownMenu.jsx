@@ -124,7 +124,8 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
     const toggleDropdown = () => {
         if (location.pathname === "/") {
-            navigate(`/${user.id}`);
+            // navigate(`/${user.id}`);
+            navigate("/");
         }
         
         if (user) {

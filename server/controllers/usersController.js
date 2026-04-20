@@ -1,7 +1,6 @@
 import Users from "../models/usersModel.js"
 import jwt from "jsonwebtoken";
 
-
 // Create JWT
 const createToken = (_id) => {
     // Three arguments for sign function:

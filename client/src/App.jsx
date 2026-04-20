@@ -5,13 +5,82 @@ import './styles/index.css'
 import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from 'react-hot-toast';
 
 
 export default function App() {
   const [typingDone, setTypingDone] = useState(false);
   const location = useLocation().pathname;
   const { user } = useAuthContext();
+  const [categories, setCategories] = useState([]);
+  const [showCreateInput, setShowCreateInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Fetch categories when user is logged in or when navigating to home page
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!user) return;
+      
+      try {
+        const response = await fetch("/api/categories", {
+          headers: {
+            "Authorization": `Bearer ${user.token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    if (user && location === "/") {
+      fetchCategories();
+    }
+  }, [user, location]);
+
+  // Handle creating a new category
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+    
+    if (!newCategoryName.trim()) {
+      toast.error("Category name cannot be empty");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          name: newCategoryName,
+          userId: user.id
+        })
+      });
+
+      if (response.ok) {
+        const newCategory = await response.json();
+        setCategories([newCategory, ...categories]);
+        setNewCategoryName("");
+        setShowCreateInput(false);
+        toast.success(`Category "${newCategoryName}" created!`);
+      }
+    } catch (err) {
+      console.error("Failed to create category:", err);
+      toast.error("Failed to create category");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <>
@@ -64,10 +133,64 @@ export default function App() {
 
               {/* When user is logged in */}
               {user && (
-                <TypewriterText
-                  text="Welcome to your closet!"
-                  speed={55}
-                />
+                <div className="flex flex-col items-center gap-8">
+                  <TypewriterText
+                    text="Welcome to your closet!"
+                    speed={100}
+                  />
+
+                  {/* Categories and Create Button */}
+                  <div className="flex flex-wrap justify-center items-center gap-6 max-w-5xl">
+                    {/* Category Buttons */}
+                    {categories.map((category) => (
+                      <a
+                        key={category._id}
+                        href={`/${user.id}/${category._id}`}
+                        className="font-bold text-2xl funnel-display [word-spacing:normal] whitespace-nowrap text-white bg-gray-800 hover:bg-gray-700 px-8 py-4 rounded-lg border-white shadow-lg transition"
+                      >
+                        {category.name.replace(/-/g, " ")}
+                      </a>
+                    ))}
+
+                    {/* Create Category Button / Input */}
+                    {!showCreateInput ? (
+                      <button
+                        onClick={() => setShowCreateInput(true)}
+                        className="font-bold text-4xl funnel-display w-16 h-16 flex items-center justify-center text-white bg-green-400 hover:bg-green-300 rounded-full  border-white shadow-lg transition"
+                      >
+                        +
+                      </button>
+                    ) : (
+                      <form onSubmit={handleCreateCategory} className="flex gap-3 items-center">
+                        <input
+                          type="text"
+                          placeholder="New category"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          className="px-6 py-4 text-2xl funnel-display rounded-lg bg-gray-800 text-white border-3 border-white focus:outline-none"
+                          autoFocus
+                        />
+                        <button
+                          type="submit"
+                          disabled={isCreating}
+                          className="font-bold text-2xl funnel-display text-white bg-gray-800 hover:bg-gray-700 disabled:opacity-50 px-6 py-4 rounded-lg border-3 border-white transition"
+                        >
+                          {isCreating ? "..." : "Add"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCreateInput(false);
+                            setNewCategoryName("");
+                          }}
+                          className="font-bold text-2xl funnel-display text-white bg-gray-800 hover:bg-gray-700 px-6 py-4 rounded-lg border-3 border-white transition"
+                        >
+                          ✕
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </div>
               )}
           </div>
         </div>
