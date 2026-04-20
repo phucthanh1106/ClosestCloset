@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useAuthContext } from "../hooks/useAuthContext.js";
+import API_BASE_URL from "../config.js";
 
 export default function ItemCardForm({ item, onClose, onSave }) {
     const { user } = useAuthContext();
@@ -27,7 +28,7 @@ export default function ItemCardForm({ item, onClose, onSave }) {
             const categoryId = item.category.toString();
             const itemId = item._id;
 
-            const response = await fetch(`/api/categories/${categoryId}/${itemId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/${itemId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json', // Required for the server to "see" your data

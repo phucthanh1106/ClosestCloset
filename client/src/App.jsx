@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import toast from 'react-hot-toast';
+import API_BASE_URL from './config.js';
 
 
 export default function App() {
@@ -24,7 +25,7 @@ export default function App() {
       if (!user) return;
       
       try {
-        const response = await fetch("/api/categories", {
+        const response = await fetch(`${API_BASE_URL}/api/categories`, {
           headers: {
             "Authorization": `Bearer ${user.token}`
           }
@@ -55,7 +56,7 @@ export default function App() {
 
     setIsCreating(true);
     try {
-      const response = await fetch("/api/categories", {
+      const response = await fetch(`${API_BASE_URL}/api/categories`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

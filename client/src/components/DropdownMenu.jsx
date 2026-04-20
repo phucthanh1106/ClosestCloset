@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthContext } from "../hooks/useAuthContext.js"
+import API_BASE_URL from "../config.js";
 
 
 export default function DropdownMenu({ label, items, addBool, basePath }) {
@@ -21,7 +22,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
         }
         const fetchCategories = async () => {
             try {
-                const res = await fetch("/api/categories", {
+                const res = await fetch(`${API_BASE_URL}/api/categories`, {
                     headers: {
                         "Authorization": `Bearer ${user.token}`
                     }
@@ -65,7 +66,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
         // Sending new category to db
         try {
-            const response = await fetch('/api/categories', {
+            const response = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: "POST",
                 headers: { 
                     'Content-Type': 'application/json',
@@ -93,7 +94,7 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
     // Function to handle delete a category
     const deleteCategory = async (catId, e) => {
-        const endpoint = `/api/categories/${catId}`; // IMPORTANT!!!!: Use `` as "" and '' are just plain strings
+        const endpoint = `${API_BASE_URL}/api/categories/${catId}`; // IMPORTANT!!!!: Use `` as "" and '' are just plain strings
         // Check for user's confirmation first
         if (!window.confirm("Are you sure you want to delete this category?")) return;
         

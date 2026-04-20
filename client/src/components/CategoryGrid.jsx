@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import ItemCard from "./ItemCard.jsx";
 import AddPhotoButton from "./AddPhotoButton.jsx";
+import API_BASE_URL from '../config.js';
 
 export default function CategoryGrid() {
   const [items, setItems] = useState([]); // state to hold items in this category
@@ -14,7 +15,7 @@ export default function CategoryGrid() {
     // Getting the items from the server
     const fetchItems = async () => {
       try {
-        const response = await fetch(`/api/categories/${categoryId}/itemCards`, {
+        const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
           headers: {
             "Authorization": `Bearer ${user.token}`
           }
@@ -88,7 +89,7 @@ export default function CategoryGrid() {
     if (!newFile) return;
 
     try {
-      const response = await fetch(`/api/categories/${categoryId}/itemCards`, {
+      const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json', // Required for the server to "see" your data
@@ -125,7 +126,7 @@ export default function CategoryGrid() {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const response = await fetch(`/api/categories/${categoryId}/itemCards/${itemId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards/${itemId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${user.token}`,
