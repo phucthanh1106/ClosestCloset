@@ -15,7 +15,7 @@ export const useLogin = () => {
         let loginError = null;
 
         try {
-            const response = await fetch("https://closestcloset-backend.onrender.com/users/login", {
+            const response = await fetch(`${API_BASE_URL}/api/users/login`, {
                 method: 'POST',
                 headers: {"Content-type": "application/json"},
                 body: JSON.stringify({ email, password })
@@ -24,14 +24,15 @@ export const useLogin = () => {
             console.log("Login response status:", response.status);
             console.log("Login response headers:", response.headers.get('content-type'));
 
-            const loginInfo = await response.json();
-            console.log("Login response data:", loginInfo);
-
+            // Check if response is ok BEFORE parsing JSON
             if (!response.ok) {
+                const errorInfo = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
                 setIsLoading(false);
-                // setError(loginInfo.error);
-                loginError = loginInfo.error;
+                loginError = errorInfo.error || `Server error: ${response.status}`;
             } else {
+                const loginInfo = await response.json();
+                console.log("Login response data:", loginInfo);
+                
                 localStorage.setItem("user", JSON.stringify(loginInfo));
 
                 // Update context after login successfully
