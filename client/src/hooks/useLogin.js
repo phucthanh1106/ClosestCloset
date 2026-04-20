@@ -14,39 +14,28 @@ export const useLogin = () => {
         // setError(null);
         let loginError = null;
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/users/login`, {
-                method: 'POST',
-                headers: {"Content-type": "application/json"},
-                body: JSON.stringify({ email, password })
-            })
+        const response = await fetch(`${API_BASE_URL}/api/users/login`, {
+            method: 'POST',
+            headers: {"Content-type": "application/json"},
+            body: JSON.stringify({ email, password })
+        })
 
-            console.log("Login response status:", response.status);
-            console.log("Login response headers:", response.headers.get('content-type'));
+        const loginInfo = await response.json();
 
-            // Check if response is ok BEFORE parsing JSON
-            if (!response.ok) {
-                const errorInfo = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
-                setIsLoading(false);
-                loginError = errorInfo.error || `Server error: ${response.status}`;
-            } else {
-                const loginInfo = await response.json();
-                console.log("Login response data:", loginInfo);
-                
-                localStorage.setItem("user", JSON.stringify(loginInfo));
-
-                // Update context after login successfully
-                dispatch({ type: "LOGIN", payload: loginInfo });
-
-                setIsLoading(false);
-            }
-
-            return loginError;
-        } catch (err) {
-            console.error("Login error:", err);
+        if (!response.ok) {
             setIsLoading(false);
-            return err.message;
+            // setError(loginInfo.error);
+            loginError = loginInfo.error;
+        } else {
+            localStorage.setItem("user", JSON.stringify(loginInfo));
+
+            // Update context after login successfully
+            dispatch({ type: "LOGIN", payload: loginInfo });
+            
+            setIsLoading(false);
         }
+
+        return loginError;
     }
 
     return { login, error, isLoading }

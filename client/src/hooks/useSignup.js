@@ -12,33 +12,26 @@ export const useSignup = () => {
         // setError(null);
         let signupError = null;
 
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
-                method: 'POST',
-                headers: {"Content-type": "application/json"},
-                body: JSON.stringify({ email, password })
-            })
+        const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
+            method: 'POST',
+            headers: {"Content-type": "application/json"},
+            body: JSON.stringify({ email, password })
+        })
 
-            // Check if response is ok BEFORE parsing JSON
-            if (!response.ok) {
-                const errorInfo = await response.json().catch(() => ({ error: `Server error: ${response.status}` }));
-                setIsLoading(false);
-                signupError = errorInfo.error || `Server error: ${response.status}`;
-            } else {
-                const signupInfo = await response.json();
+        const signupInfo = await response.json();
 
-                // save the user to local storage so that if the user comes back a few hours later
-                // they will still be signed in 
-                localStorage.setItem("user", JSON.stringify(signupInfo));
-
-                // update the auth context
-                dispatch({ type: 'LOGIN', payload: signupInfo });
-                setIsLoading(false);
-            }
-        } catch (err) {
-            console.error("Signup error:", err);
+        if (!response.ok) {
             setIsLoading(false);
-            signupError = err.message;
+            // setError(signupInfo.error);
+            signupError = signupInfo.error;
+        } else {
+            // save the user to local storage so that if the user comes back a few hours later
+            // they will still be signed in 
+            localStorage.setItem("user", JSON.stringify(signupInfo));
+
+            // update the auth context
+            dispatch({ type: 'LOGIN', payload: signupInfo });
+            setIsLoading(false);
         }
 
         return signupError;
