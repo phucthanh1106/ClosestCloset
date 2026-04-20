@@ -48,7 +48,7 @@ export default function Signup() {
             >
                 <h3 className="mb-8 text-center text-5xl font-bold text-gray-300">Sign Up</h3>
 
-                <div className="mb-4">
+                <div className="mb-5">
                     <input
                         type="email"
                         className="w-full rounded-full text-m bg-white/8 py-3 pl-5 pr-12 text-white placeholder-white/70 outline-none"
@@ -58,7 +58,7 @@ export default function Signup() {
                     />
                 </div>
 
-                <div className="mb-6 relative">
+                <div className="mb-4 relative">
                     <input
                         type={showPassword ? "text" : "password"}
                         className="w-full text-m rounded-full  bg-white/8 py-3 pl-5 pr-12 text-white placeholder-white/70 outline-none"
@@ -98,10 +98,10 @@ export default function Signup() {
 
                 {/* Password match indicator - outside relative container */}
                 {confirmPassword && password !== confirmPassword && (
-                    <p className="text-red-400 text-sm mb-6">Passwords do not match</p>
+                    <p className="text-red-400 text-sm ml-3 mb-6">Passwords do not match</p>
                 )}
                 {confirmPassword && password === confirmPassword && (
-                    <p className="text-green-400 text-sm mb-6">Passwords match</p>
+                    <p className="text-green-400 text-sm ml-3 mb-6">Passwords match</p>
                 )}
                 {!confirmPassword && (
                     <div className="mb-6"></div>
@@ -110,7 +110,7 @@ export default function Signup() {
 
                 <button 
                     disabled={isLoading || password !== confirmPassword || !password || !confirmPassword || !email}
-                    className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:pointer-events-none"
                 >
                     Sign up
                 </button>
