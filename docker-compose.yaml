@@ -1,0 +1,49 @@
+services:
+  client:
+    build: ./client
+    container_name: client_container
+    ports:
+      - '5173:5173'
+    environment:
+      - VITE_API_BASE_URL=            
+      - NODE_ENV=development          
+    networks:
+      - closestcloset
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+  server:
+    build: ./server
+    container_name: server_container
+    ports:
+      - '4000:4000'
+    networks:
+      - closestcloset
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - db
+  db:
+    image: mongo:7.0-jammy
+    container_name: db_container
+    restart: always
+    # environment:
+    #   MONGO_INITDB_DATABASE: closestcloset
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - closestcloset
+
+version: '3.8'
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  closestcloset:
+    driver: bridge
+

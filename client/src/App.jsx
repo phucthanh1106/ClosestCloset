@@ -55,6 +55,7 @@ export default function App() {
     }
 
     setIsCreating(true);
+    
     try {
       const response = await fetch(`${API_BASE_URL}/api/categories`, {
         method: "POST",
