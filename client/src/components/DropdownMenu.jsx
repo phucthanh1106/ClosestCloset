@@ -6,7 +6,7 @@ import { useAuthContext } from "../hooks/useAuthContext.js"
 import API_BASE_URL from "../config.js";
 
 
-export default function DropdownMenu({ label, items, addBool, basePath }) {
+export default function DropdownMenu({ label, items, addBool, basePath, onDeleteCategory }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [categories, setCategories] = useState(items);
 
@@ -113,10 +113,16 @@ export default function DropdownMenu({ label, items, addBool, basePath }) {
 
             // Check conditions of the response
             if (response.ok) {
-                setCategories(((prev) => prev.filter((cat) => cat._id !== catId)));
+                    // Update local dropdown state
+                    setCategories(((prev) => prev.filter((cat) => cat._id !== catId)));
 
-                // Navigate the user back to the main page
-                navigate("/my-closet");
+                    // Inform parent (App) about deletion so it can update its categories state
+                    if (typeof onDeleteCategory === 'function') onDeleteCategory(catId);
+
+                    // Navigate the user back to the main page
+                    navigate("/");
+                    // Force a full page reload so parent views update (equivalent to F5)
+                    window.location.reload();
             } else {
                 const errorMessage = await response.json();
                 console.error(errorMessage);

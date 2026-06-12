@@ -8,6 +8,9 @@ import API_BASE_URL from '../config.js';
 export default function CategoryGrid() {
   const [items, setItems] = useState([]); // state to hold items in this category
   const [categoryName, setCategoryName] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
   const { categoryId } = useParams(); // reads the dynamic part of URL
   const { user } = useAuthContext();
 
@@ -151,13 +154,96 @@ export default function CategoryGrid() {
     setItems((prevItems) => prevItems.map(item => item._id === updatedItem._id ? updatedItem : item))
   }
 
+  // Rename category
+  const handleStartEdit = () => {
+    setEditName(categoryName);
+    setIsEditing(true);
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditName("");
+  }
+
+  const handleSaveName = async () => {
+    const trimmed = editName.trim();
+    if (!trimmed) return alert('Category name cannot be empty');
+
+    setIsSavingName(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      });
+
+      if (response.ok) {
+        const updated = await response.json();
+        setCategoryName(updated.name);
+        setIsEditing(false);
+        // Reload so navbar/dropdown syncs
+        window.location.reload();
+      } else {
+        const err = await response.json();
+        console.error('Rename failed', err);
+        alert('Rename failed');
+      }
+    } catch (err) {
+      console.error('Rename error', err);
+      alert('Rename failed');
+    } finally {
+      setIsSavingName(false);
+    }
+  }
+
   return (
     <div className="w-full flex flex-col items-center pt-5">
-      {/* Category name */}
-      <h1 className="text-center font-[500] funnel-display text-black text-6xl pt-5 ">{categoryName.replace(/-/g, " ")}</h1>
+      {/* Category name with edit button */}
+      <div className="w-full flex items-center justify-center pt-5 ml-10">
+        {!isEditing ? (
+          <h1 className="font-[500] funnel-display text-black text-6xl">{categoryName}</h1>
+        ) : (
+          <input
+            className="text-center text-6xl funnel-display bg-transparent border-b-2 border-dashed border-gray-400 focus:outline-none"
+            value={editName}
+            style={{ width: `${Math.max(editName.length, 2)}ch` }}
+            onChange={(e) => setEditName(e.target.value)}
+          />
+        )}
+
+        {/* Pen icon / buttons */}
+        <div className="ml-4">
+            {!isEditing ? (
+              <button onClick={handleStartEdit} aria-label="Edit category" className="text-gray-700 hover:text-black relative top-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+              </button>
+            ) : (
+              <div className="flex gap-2 items-center relative top-2">
+                <button
+                  onClick={handleSaveName}
+                  disabled={isSavingName}
+                  title="Save"
+                  className={`p-2 rounded ${isSavingName ? 'opacity-60 cursor-not-allowed' : 'hover:text-black text-white'}`}>
+                  {!isSavingName ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  )}
+                </button>
+
+                <button onClick={handleCancelEdit} title="Cancel" className="p-2 text-white rounded hover:text-black">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            )}
+        </div>
+      </div>
 
       {/* Add Photo Button */}
-      <div className="flex justify-center mt-5">
+      <div className="flex mt-5">
         <AddPhotoButton addItem={handleAddItem} />
       </div>
 

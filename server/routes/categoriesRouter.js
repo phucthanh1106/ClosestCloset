@@ -60,6 +60,27 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
     }
 });
 
+// PUT update a category (e.g., rename)
+categoriesRouter.put('/:categoryId', async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const updated = await Categories.findByIdAndUpdate(
+            categoryId,
+            { $set: req.body },
+            { new: true, runValidators: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+
+        res.status(200).json(updated);
+    } catch (err) {
+        console.error('Category update error:', err);
+        res.status(500).json({ err: err.message });
+    }
+});
+
 // GET items from a category
 categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
     try {

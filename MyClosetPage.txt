@@ -4,30 +4,22 @@ include a white icon of editing (a pen) and when they click on it, they can
 provide the description. However, if it already has some description, show 
 the summary.
 
++ Paste an image onto the screen and it will automatically be uploaded to the user's closet
+
+
 
 - Unfinished:
-+ Background remover when the user uploads images 
++ Chatbot
 
-+ When users upload a horizontal image (or maybe images of any sizes), give them the ability to crop it the way they want.
++ Showcase some articles
 
 + When an user clicks on the item card, blur the background and show the item on the left side and description on right side
 
 + Search button
 
-+ Bottom part of the page to show some information/About page
-
-+ A large white rectangle button in the middle of the homepage to leads the user
-to their closet
-
-+ Paste an image onto the screen and it will automatically be uploaded to the user's closet
-
 + Has an option to select multiple images and delete them
 
 + Make a 3 dots symbol next to the category's name such that they can either edit the name or delete it
-
-+ Make it possible to store multiple time cards in 1 main time cards
-
-+ Make the homepage show case most liked items from other users or maybe showcase some articles
 
 + Make it possible for a person to make their item cards be public or private so other people can also browse their collection
 
