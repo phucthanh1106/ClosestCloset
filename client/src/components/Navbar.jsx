@@ -4,7 +4,7 @@ import { useLogout } from "../hooks/useLogout.js"
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from "../hooks/useAuthContext.js"
 
-export default function Navbar() {
+export default function Navbar({ categories = [] }) {
     const { logout } = useLogout();
     const { user } = useAuthContext();
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function Navbar() {
         {/* Left side of nav bar */}
         {user && (
             <ul class="nav-items">
-                <li><DropdownMenu label="My Closet" items={[]} addBool={true} basePath={user.id}></DropdownMenu></li>
+                <li><DropdownMenu label="My Closet" items={categories} addBool={true} basePath={`/${user.id}`}></DropdownMenu></li>
             </ul>
         )}
 

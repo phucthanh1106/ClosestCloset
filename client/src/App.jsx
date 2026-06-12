@@ -99,7 +99,7 @@ export default function App() {
         }}
         />
 
-      <Navbar />
+      <Navbar categories={categories} />
 
       {/* Text running */}
       {location==="/" && (

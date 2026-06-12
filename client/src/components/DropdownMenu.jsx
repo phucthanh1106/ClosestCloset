@@ -9,6 +9,11 @@ import API_BASE_URL from "../config.js";
 export default function DropdownMenu({ label, items, addBool, basePath }) {
     const [showDropdown, setShowDropdown] = useState(false);
     const [categories, setCategories] = useState(items);
+
+    // Sync local state when items prop changes
+    useEffect(() => {
+        setCategories(items);
+    }, [items]);
     const { user } = useAuthContext();
     const navigate = useNavigate();
 
