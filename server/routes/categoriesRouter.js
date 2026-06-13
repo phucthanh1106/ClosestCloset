@@ -2,6 +2,8 @@ import Categories from "../models/categoriesModel.js";
 import ItemCards from "../models/itemCardsModel.js";
 import express from 'express';
 import requireAuth from "../middlewares/requireAuth.js"
+import { vectorService } from "../services/vectorStore.js";
+import { geminiService } from "../services/geminiService.js"
 
 const categoriesRouter = express.Router();
 
@@ -64,6 +66,7 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
 categoriesRouter.put('/:categoryId', async (req, res) => {
     try {
         const { categoryId } = req.params;
+
         const updated = await Categories.findByIdAndUpdate(
             categoryId,
             { $set: req.body },
@@ -116,12 +119,12 @@ categoriesRouter.post("/:categoryId/itemCards", async (req, res) => {
 });
 
 
-// DELETE an image from the database
+// DELETE an item from the database
 categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
     try {
         const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
-        const { userId } = req.user.id;
-        const deletedItem = await ItemCards.findByIdAndDelete({
+        const  userId = req.user.id;
+        const deletedItem = await ItemCards.findOneAndDelete({
             _id: itemId, 
             userId: userId  // The 'Lock'
         });
@@ -129,6 +132,11 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
         if (!deletedItem) {
             return res.status(404).json({ error: "Item not found in database" });
         }
+
+        // Upload this item's information to the index in Pipecone
+        await vectorService.deleteItemCard(userId, itemId).catch(err => {
+            console.error("Background vector deletion event tracking failure:", err);
+        });
 
         res.status(200).json({ message: "Item deleted successfully" });
     } catch (err) {
@@ -138,23 +146,43 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
 });
 
 
-// PUT (save) an image's form
+// PUT (save) an item's form
 // IMPORTANT!!!: PUT is for updating information
 categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
     console.log("server reached");
     try {
         const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
+        let newData = { ...req.body };
+
+        try {
+            const geminiParagraph = await geminiService.generateItemContent({ 
+                brand: newData.brand,
+                notes: newData.notes,
+                url: newData.url,
+                description: newData.description
+            })
+
+            console.log(geminiParagraph)
+            
+            // Add the newly created paragraph to the Item
+            newData.geminiDescription = geminiParagraph;
+        } catch (error) {   
+            console.error("AI generation failed, continue database sync")
+        }
         
         // findByIdAndUpdate takes: 1. The ID, 2. The new data, 3. Options
         const savedItem = await ItemCards.findByIdAndUpdate(
             itemId, 
-            { $set: req.body }, // $set updates only the fields sent in req.body
-            { new: true, runValidators: true } // 'new: true' returns the modified document
+            { $set: newData }, // $set updates only the fields sent in req.body
+            { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
         );
 
         if (!savedItem) {
             return res.status(404).json({ error: "Item not found in database" });
         }
+
+        // Upload this item's information to the index in Pipecone
+        await vectorService.upsertItemCard(savedItem)
 
         res.status(200).json({ message: "Item saved successfully" });
     } catch (err) {

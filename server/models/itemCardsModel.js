@@ -25,7 +25,9 @@ const itemCardSchema = new Schema({
     brand: String,
     url: String, 
     notes: String,
-    hasInfo: Boolean
+    hasInfo: Boolean,
+
+    geminiDescription: String
 }, { timestamps: true }); 
 
 // Convert to a model to interact with the database

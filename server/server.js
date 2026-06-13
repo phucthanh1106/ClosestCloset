@@ -6,6 +6,7 @@ import cors from 'cors';
 // Importing routers
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
+// import chatbotRouter from "./routes/chatbotRouter.js";
 
 dotenv.config(); // Load the variables from .env
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
+// app.use("/api/chat", chatbotRouter);
 
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;
