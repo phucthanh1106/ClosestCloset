@@ -9,27 +9,36 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 export const geminiService = {
     async generateItemContent({ brand, notes, url, description }) {
         try { 
+            const checkedUrl = (url && url.trim() !== "" && url !== "undefined") 
+                ? `Purchased/found at: ${url}` 
+                : "No source URL provided.";
+            
             const prompt = `
-                You are a fashion assistant for a personal digital wardrobe app.
-                Write a concise, short and cohesive summarization (3-4 sentences) for a clothing item based on the following raw details:
-                
-                - Description: ${description || 'Clothing Item'}
-                - Source/URL: ${url || 'No URL'}
-                - Brand: ${brand || 'Unspecified Brand'}
-                - User Notes: ${notes || 'No notes provided.'}
+                You are a strict, non-creative fashion assistant for a digital wardrobe app.
+                Analyze the following clothing item properties to Write a cohesive, natural 3-4 sentence summary for this item:
+                - Brand: ${brand || 'Unknown'}
+                - Item Category/Description: ${description || 'Clothing item'}
+                - Reference URL: ${checkedUrl}
+                - User Notes: ${notes || 'None'}
 
-                Rules:
-                1. Write it naturally from the perspective of a fashion/clothing encyclopaedia/wikipedia.
-                2. Include style, vibe, materials, what occasion to wear this.
-                3. Look up materials and measurements of this item online (or from the url) and include that information.
-                4. Write something about how the user intends to use it based on their notes (if notes are provided). 
-                5. Do NOT invent fake specifications or any information (like fabric percentages or measurements) if they aren't provided.
-                6. Return ONLY the description paragraph. Do not include any intro like "Here is your description:".
+                STRICT ENTRY RULES:
+                1. FIRST PRIORITY: Use your search tool to analyze the Reference URL if provided to gather real-world specifications like the fabrics, measurements, style, silhouette of the piece.
+                2. ZERO HALLUCINATIONS: Do NOT make up, assume, or guess any fabrics or measurements if the notes or url do not mention a fabric.
+                3. If they are completely missing or unverified, state exactly this phrase: "Specific material and measurement specs are currently unverified." Do not guess or approximate values.
+                4. State target styling ideas or occasions based on the User Notes.
+                5. Return ONLY the final description paragraph text. Do not include introductory notes.
             `.trim();
 
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                model: 'gemini-2.5-flash-lite',
                 contents: prompt,
+                config: {
+                    tools: [
+                        { 
+                            googleSearch: {} 
+                        }
+                    ] 
+                }
             });
 
             const content = response.text?.trim();

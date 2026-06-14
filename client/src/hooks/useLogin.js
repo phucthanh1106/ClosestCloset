@@ -20,6 +20,8 @@ export const useLogin = () => {
             body: JSON.stringify({ email, password })
         })
 
+        console.log
+
         const loginInfo = await response.json();
 
         if (!response.ok) {

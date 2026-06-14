@@ -1,5 +1,6 @@
 import Navbar from "./components/Navbar.jsx"
 import TypewriterText from "./components/TypewriterText.jsx";
+import ChatBot from "./components/ChatBot.jsx";
 import { useAuthContext } from "./hooks/useAuthContext.js";
 import './styles/index.css'
 import { Outlet } from 'react-router-dom';
@@ -198,6 +199,7 @@ export default function App() {
         </div>
       )}
       <Outlet />
+      {user && <ChatBot />}
     </>
   )
 }
