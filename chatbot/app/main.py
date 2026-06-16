@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.chatbot import chatbot_router
+from api.chatbot_api import chatbot_router
 
 app = FastAPI()
 
@@ -18,6 +18,6 @@ app.add_middleware(
     allow_headers=["*"],  # 💥 CRITICAL: This allows Authorization headers!
 )
 
-app.include_router(chatbot_router, prefix="/api/chatbot")
+app.include_router(chatbot_router, prefix="/chatbot-api")
 
 

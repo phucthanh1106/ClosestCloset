@@ -82,8 +82,8 @@ def build_prompt(user_message: str, contexts: List[Dict]) -> str:
     """Construct the assistant prompt using the user message and retrieved contexts."""
     # New template: concise, user-focused, instructive for the closet assistant
     header = (
-        "You are ClosestCloset — a succinct assistant that helps users manage and query their personal wardrobe data.\\n"
-        "Guidelines:\\n"
+        "You are ClosestCloset — a wardrobe assistant that helps users manage and query their personal wardrobe data.\\n"
+        "RULES:\\n"
         "- Use only the provided context snippets below when answering.\\n"
         "- Keep answers short (1-3 sentences) and suggest one clear next action when helpful.\\n"
         "- When referring to items, include category and a single-line reason.\\n\\n"
@@ -96,20 +96,18 @@ def build_prompt(user_message: str, contexts: List[Dict]) -> str:
         text = meta.get("text") or context.get("text")
         context_lines.append(f"[{i}] id:{id} — {text}")
 
-    context_block = "\\n".join(context_lines) if context_lines else "(no context available)"
+    context_block = "\n".join(context_lines) if context_lines else "(no context available)"
 
     prompt = (
-        f"{header}Context snippets:\\n{context_block}\\n\\nUser message:\\n{user_message}\\n\\nAssistant:\\n"
-    )
+            f"{header}Context snippets:\n{context_block}\n\n"
+            f"User message:\n{user_message}\n\n"
+            f"Assistant:\n"
+        )
     return prompt
 
 
-def generate_response(user_message: str, namespace: str, top_k: int = 3) -> str:
+def generate_response(user_message: str, namespace: str, top_k: int = 5) -> str:
     """Main entry: retrieve relevant contexts and generate a short reply.
-
-    Best-effort: uses Pinecone + Google embeddings for retrieval and OpenAI
-    ChatCompletion for generation. If model calls are not available, returns the
-    assembled prompt so you can inspect it.
     """
     retriever = Retriever()
     # embed the user message
@@ -117,9 +115,9 @@ def generate_response(user_message: str, namespace: str, top_k: int = 3) -> str:
     contexts = []
     if vector and retriever._index:
         contexts = retriever.query_index(vector, namespace=namespace, top_k=top_k)
-    print(contexts)
 
     prompt = build_prompt(user_message, contexts)
+    print(prompt)
 
     # Try OpenAI ChatCompletion as the generator (fallback to returning prompt)
     try:

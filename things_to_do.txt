@@ -1,0 +1,6 @@
+- Memory for RAG
+- Dockerize fastapi
+- Use redis caching
+- reorganize UI like pinterest and show item's image next to the form
+- for the form, only allow to click save if they have made some changes to the fields
+- otp verification

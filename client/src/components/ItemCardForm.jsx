@@ -18,43 +18,47 @@ export default function ItemCardForm({ item, onClose, onSave }) {
     // handleSubmit handles the form; onSubmit handles your app logic
     // data is an object whose keys are the names you passed to register, and whose values are the current input values
     const onSubmit = async (data) => {
-        try {
             const updatedItem = {
                 ...item,
                 ...data,
                 hasInfo: true
             };
 
-            const categoryId = item.category.toString();
-            const itemId = item._id;
-
-            const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/${itemId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json', // Required for the server to "see" your data
-                    "Authorization": `Bearer ${user.token}`,
-                },
-                body: JSON.stringify({
-                    file: item.file,
-                    category: categoryId, 
-                    description: data.description,      
-                    brand: data.brand,
-                    url: data.url,
-                    notes: data.notes,
-                    hasInfo: true
-                }),
-            })
-
-            if (!response.ok) {
-                throw new Error(`Server responded with status: ${response.status}`);
-            }
-
+            // Save locally and slam the modal shut immediately
             onSave(updatedItem);
             onClose();
-        } catch (err) {
-            console.error("Failed to save item's info to database:", err);
-            alert("Save info failed!");
-        }
+
+            try {
+                const categoryId = item.category.toString();
+                const itemId = item._id;
+
+                const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/${itemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json', // Required for the server to "see" your data
+                        "Authorization": `Bearer ${user.token}`,
+                    },
+                    body: JSON.stringify({
+                        file: item.file,
+                        category: categoryId, 
+                        description: data.description,      
+                        brand: data.brand,
+                        url: data.url,
+                        notes: data.notes,
+                        hasInfo: true
+                    }),
+                })
+
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+
+                console.log("Item sync finished smoothly in the background.");
+            } catch (err) {
+                console.error("Background sync failed:", err);
+                // Optional: You can trigger a small toast notification or revert state here if critical
+                alert("Warning: Background sync failed to save to the database cloud!");
+            }
     }
 
     

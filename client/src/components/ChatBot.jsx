@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { useAuthContext } from "../hooks/useAuthContext.js";
 import { MessageCircle } from 'lucide-react';
-
-const INITIAL_MESSAGES = [
-    { id: 1, from: 'bot', text: 'Welcome — this is a placeholder reply.' },
-    { id: 2, from: 'card', text: 'Example article card: When can I amend my 2025 tax return?', actionText: 'View article' },
-    { id: 3, from: 'bot', text: 'Was this helpful?' }
-];
+import CHATBOT_API_BASE_URL from '../config.js';
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
@@ -24,35 +20,51 @@ export default function ChatBot() {
         e && e.preventDefault();
 
         // Read the text content that the user just typed
-        const text = input.trim();
-        if (!text) return;
+        const message = input.trim();
+        if (!message) return;
 
         // Add it to message history array
-        const userMsg = { id: Date.now(), from: 'user', text };
-        setMessages([...messages, userMsg]);
+        const userMsg = { id: Date.now(), from: 'user', message };
+        setMessages((prevMessages) => [...prevMessages, userMsg]);
+
         //  Clear out the input field
         setInput('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/chatbot/messages`, {
+            const response = await fetch(`${CHATBOT_API_BASE_URL}/chatbot-api/messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Required for the server to "see" your data
                     "Authorization": `Bearer ${user.token}`,
                 },
-                body: JSON.stringify({
-                    file: newFile,
-                    category: categoryId, // This comes from your fetchCategory useEffect
-                    description: "",      // Initial empty values
-                    userId: user.id,
-                    brand: "",
-                    url: "",
-                    notes: "",
-                    hasInfo: false
-                }),
+                body: JSON.stringify(userMsg),
             });
+
+            const chatbotRep = await response.json();
+
+            if (response.ok) {
+                const botMsg = {
+                    id: Date.now() + 1, // Ensure distinct mapping keys
+                    from: 'bot',
+                    message: chatbotRep.reply // Extracts the key sent by FastAPI
+                };
+                
+                // Append the chatbot reply into the feed history
+                setMessages((prevMessages) => [...prevMessages, botMsg]);
+            } else {
+                setMessages((prevMessages) => [
+                    ...prevMessages, 
+                    { id: Date.now() + 1, from: 'bot', message: "Sorry, I'm having trouble reaching the server right now. Please try again!" }
+                ]);
+            }
+
+
         } catch (error) {
-            return;
+            console.error("Network connection error encountered:", error);
+            setMessages((prevMessages) => [
+                ...prevMessages, 
+                { id: Date.now() + 1, from: 'bot', message: "Network connection lost. Please check your local servers." }
+            ]);
         }
     };
 
@@ -132,13 +144,13 @@ export default function ChatBot() {
                                             // #article card container
                                             <div style={{ background: '#FFF', border: '1px solid #E5E7EB', borderRadius: 20, padding: 16, boxShadow: '0 4px 12px rgba(0,0,0,0.03)', width: '100%' }}>
                                                 {/* #article card text */}
-                                                <div style={{ color: '#111827', fontWeight: 600, fontSize: 15, marginBottom: 14, lineHeight: 1.4 }}>{m.text}</div>
+                                                <div style={{ color: '#111827', fontWeight: 600, fontSize: 15, marginBottom: 14, lineHeight: 1.4 }}>{m.message}</div>
                                                 {/* #article card action button */}
                                                 <button style={{ width: '100%', background: '#00BFA5', color: '#FFF', border: 'none', padding: '12px', borderRadius: 24, fontWeight: 600, fontSize: 14 }}>{m.actionText}</button>
                                             </div>
                                         ) : (
                                             // #standard message bubble
-                                            <div style={{ background: isUser ? '#00BFA5' : '#F1F3F4', padding: '12px 16px', borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px', color: isUser ? '#FFF' : '#111827', fontSize: 14, lineHeight: 1.5 }}>{m.text}</div>
+                                            <div style={{ background: isUser ? '#00BFA5' : '#F1F3F4', padding: '12px 16px', borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px', color: isUser ? '#FFF' : '#111827', fontSize: 14, lineHeight: 1.5 }}>{m.message}</div>
                                         )}
                                     </div>
                                 </div>

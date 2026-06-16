@@ -133,12 +133,13 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
             return res.status(404).json({ error: "Item not found in database" });
         }
 
-        // Upload this item's information to the index in Pipecone
+        // IMMEDIATELY respond 200 OK back to the frontend network channel
+        res.status(200).json({ message: "Item deleted successfully" });
+
+        // Delete this item's information from the index in Pipecone
         await vectorService.deleteItemCard(userId, itemId).catch(err => {
             console.error("Background vector deletion event tracking failure:", err);
         });
-
-        res.status(200).json({ message: "Item deleted successfully" });
     } catch (err) {
         console.error("Item delete error: ", err);
         res.status(500).json({ err: err.message });
@@ -154,6 +155,17 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
         let newData = { ...req.body };
 
+        // RUN THIS FIRST so user changes hit MongoDB instantly (Takes ~10ms)
+        const savedItem = await ItemCards.findByIdAndUpdate(
+            itemId, 
+            { $set: newData }, // $set updates only the fields sent in req.body
+            { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
+        );
+
+        if (!savedItem) {
+            return res.status(404).json({ error: "Item not found in database" });
+        }
+
         try {
             const geminiParagraph = await geminiService.generateItemContent({ 
                 brand: newData.brand,
@@ -165,26 +177,29 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
             console.log(geminiParagraph)
             
             // Add the newly created paragraph to the Item
-            newData.geminiDescription = geminiParagraph;
+            savedItem.geminiDescription = geminiParagraph;
+
+            // Save the newly updated item with gemini description to mongodb
+            await savedItem.save();
         } catch (error) {   
             console.error("AI generation failed, continue database sync")
         }
         
-        // findByIdAndUpdate takes: 1. The ID, 2. The new data, 3. Options
-        const savedItem = await ItemCards.findByIdAndUpdate(
-            itemId, 
-            { $set: newData }, // $set updates only the fields sent in req.body
-            { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
-        );
+        // // findByIdAndUpdate takes: 1. The ID, 2. The new data, 3. Options
+        // const savedItem = await ItemCards.findByIdAndUpdate(
+        //     itemId, 
+        //     { $set: newData }, // $set updates only the fields sent in req.body
+        //     { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
+        // );
 
-        if (!savedItem) {
-            return res.status(404).json({ error: "Item not found in database" });
-        }
+        // if (!savedItem) {
+        //     return res.status(404).json({ error: "Item not found in database" });
+        // }
 
         // Upload this item's information to the index in Pipecone
         await vectorService.upsertItemCard(savedItem)
 
-        res.status(200).json({ message: "Item saved successfully" });
+        console.log("Item saved successfully");
     } catch (err) {
         console.error("Item save error: ", err);
         res.status(500).json({ err: err.message });

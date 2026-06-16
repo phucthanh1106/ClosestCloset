@@ -128,7 +128,14 @@ export default function CategoryGrid() {
     // Check for user's confirmation
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
+    // Cache the item in memory just in case we need to roll back on server failure
+    const itemToBackup = items.find((item) => item._id === itemId);
+
+    // OPTIMISTIC UPDATE: Remove it from the UI state instantly!
+    setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+
     try {
+      // Fire off the delete request quietly in the background
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards/${itemId}`, {
         method: "DELETE",
         headers: {
@@ -136,16 +143,22 @@ export default function CategoryGrid() {
         }
       })
 
-      if (response.ok) {
-        setItems(((prevItems) => prevItems.filter((item) => item._id !== itemId)));;
-      } else {
+      if (!response.ok) {
         const errorMessage = await response.json();
         console.error(errorMessage);
-        alert("Could not delete category");
+        alert("Could not delete item");
       }
+
+      console.log(`Successfully removed item ${itemId} from database and Pinecone index.`);
+
     } catch (err) {
       console.error("Delete request failed: ", err);
       alert("Couldn't delete the item, check your connection!");
+
+      // 5. 🛡️ STATE ROLLBACK: If the network failed, put the item right back where it was
+      if (itemToBackup) {
+        setItems((prevItems) => [...prevItems, itemToBackup]);
+      }
     }
   }
 
@@ -248,10 +261,10 @@ export default function CategoryGrid() {
       </div>
 
       {/* Cards container */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center mt-7 mb-7">
+      <div className="mt-7 mb-7 w-full max-w-[95vw] px-4 sm:px-6 lg:px-8 columns-1 sm:columns-2 lg:columns-3 xl:columns-4 [column-gap:1.25rem]">
         {items.map((item) => (
-          <div>
-            <ItemCard key={item._id} item={item} itemId={item._id.toString()} image={item.file} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
+          <div key={item._id} className="mb-5 break-inside-avoid">
+            <ItemCard item={item} itemId={item._id.toString()} image={item.file} onDelete={handleDeleteItem} onSave={handleSaveItemInfo}/>
           </div>
         ))}
       </div>

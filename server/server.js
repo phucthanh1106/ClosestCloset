@@ -6,14 +6,13 @@ import cors from 'cors';
 // Importing routers
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
-// import chatbotRouter from "./routes/chatbotRouter.js";
 
 dotenv.config(); // Load the variables from .env
 const app = express();
 const port = process.env.PORT || 4000 
 
 app.use(cors({
-    origin: ["https://closestcloset.onrender.com", "https://closestcloset-frontend.onrender.com", "http://localhost:5173/"]
+    origin: ["https://closestcloset.onrender.com", "http://localhost:5173/"]
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -22,7 +21,6 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
-// app.use("/api/chat", chatbotRouter);
 
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;

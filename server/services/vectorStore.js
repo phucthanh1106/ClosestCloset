@@ -21,7 +21,7 @@ export const vectorService = {
             item.description ? `Description: ${item.description}.` : '',
             item.notes ? `User notes: ${item.notes}.` : '',
             item.url ? `Link to the product: ${item.url}` : '',
-            item.geminiDescription ? `A summarization about the item: ${item.geminiDescription}` : ''
+            item.geminiDescription ? `Summarization about ${item.description}: ${item.geminiDescription}` : ''
         ].filter(Boolean).join(' ');
 
         if (!semanticText) return; // Skip if there's no text data to embed
@@ -42,12 +42,18 @@ export const vectorService = {
             throw new Error('Failed to extract vector array from Gemini response');
         }
 
-      // Step C: Securely isolate inside the Pinecone Namespace using item.userId
+        // Attach metadata
+        const metadataTag = {
+            text: semanticText,
+        }
+
+        // Step C: Securely isolate inside the Pinecone Namespace using item.userId
         await index.namespace(item.userId.toString()).upsert({
             records: [
                 {
                     id: item._id.toString(), // Store MongoDB ID as the Vector ID for clean matching
-                    values: vectorValues
+                    values: vectorValues,
+                    metadata: metadataTag
                 }
             ]
         });
