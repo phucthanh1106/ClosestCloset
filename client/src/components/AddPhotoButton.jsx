@@ -18,19 +18,6 @@ const VisuallyHiddenInput = styled('input')({
 export default function AddPhotoButton({ addItem }) {
     const fileInputRef = useRef();
 
-    const convertToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file);
-            fileReader.onload = () => {
-                resolve(fileReader.result);
-            };
-            fileReader.onerror = (error) => {
-                reject(error)
-            }
-        })
-    };
-
     return (
         <Button
         component="label"
@@ -51,21 +38,15 @@ export default function AddPhotoButton({ addItem }) {
             ref={fileInputRef}  
             type="file"
             onChange={async (event) => {
-                const files = Array.from(event.target.files); // convert FileList to array
+                const files = Array.from(event.target.files);
 
-                // Check that at least one file is selected
                 if (files.length === 0) return;
 
-                // Filter only jpg/png files (extra safety)
                 const validFiles = files.filter((file) => file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp");
 
-                // Convert to base 64
-                // IMPORTANT!!!: Use a for loop instead of using forEach since forEach does not support async 
                 for (const file of validFiles) {
                     try {
-                        const base64 = await convertToBase64(file);
-                        // This will now wait for the server to say "OK" before moving to the next file
-                        await addItem(base64); 
+                        await addItem(file);
                     } catch (err) {
                         console.error("Error processing file:", file.name, err);
                     }

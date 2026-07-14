@@ -4,6 +4,10 @@ import express from 'express';
 import requireAuth from "../middlewares/requireAuth.js"
 import { vectorService } from "../services/vectorStore.js";
 import { geminiService } from "../services/geminiService.js"
+import redisClient from "../services/redisClient.js"
+// Importing firebase
+import { uploadImage } from "../middlewares/uploadImage.js";
+import { bucket } from "../services/firebaseAdmin.js" 
 
 const categoriesRouter = express.Router();
 
@@ -13,9 +17,20 @@ categoriesRouter.use(requireAuth);
 // GET all categories to the dropdown menu
 categoriesRouter.get("/", async (req, res) => {
     const id = req.user.id;
+    const cacheKey = `user:${id}:categories`;
 
     try {
+        // Try Redis first
+        const cachedCategories = await redisClient.get(cacheKey);
+
+        if (cachedCategories) {
+            return res.status(200).json(JSON.parse(cachedCategories));
+        }
+
+        // Proceed to MongoDB if Redis failed and store that missing information to Redis
         const categories = await Categories.find({ userId: id }).sort({ createdAt: -1 });
+        await redisClient.set(cacheKey, JSON.stringify(categories), { EX: 3600 });
+
         res.status(200).json(categories);
     } catch (err) {
         res.status(500).json({ error: "Failed to fetch categories" });
@@ -28,6 +43,9 @@ categoriesRouter.post("/", async (req, res) => {
         const newCategory = new Categories(req.body);
         // Save the document in the database
         const savedCategory = await newCategory.save();
+
+        // Delete the old cache in Redis
+        await redisClient.del(`user:${userId}:categories`);
 
         res.status(201).json(savedCategory);
     } catch (err) {
@@ -88,16 +106,37 @@ categoriesRouter.put('/:categoryId', async (req, res) => {
 categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
     try {
         const { categoryId } = req.params;
+        const userId = req.user.id;
+        const cacheKey = `user:${userId}:category:${categoryId}:items`;
 
-        // Find the category item
+        // Try Redis first
+        const cachedItems = await redisClient.get(cacheKey);
+
+        if (cachedItems) {
+            console.log("CACHE HIT")
+            return res.status(200).json(JSON.parse(cachedItems))
+        }
+
+        console.log("CACHE MISS");
+
+        // If Redis fails, try MongoDB
         const category = await Categories.findById(categoryId);
+
         if (!category) {
             return res.status(404).json({ error: "Category not found" });
         }
-        const categoryName = category.name;
-        
+
         const items = await ItemCards.find({ category: categoryId }).sort({ createdAt: -1 });
-        res.json({ categoryName, items });
+
+        const response = {
+            categoryName: category.name,
+            items
+        };
+
+        // Store this missing item in Redis
+        await redisClient.set(cacheKey, JSON.stringify(response), { EX: 3600 });
+
+        res.status(200).json(response);
     } catch (err) {
         res.status(500).json({ error: "Failed to get images" })
     }
@@ -105,13 +144,47 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
 
 
 // POST items to a category
-categoriesRouter.post("/:categoryId/itemCards", async (req, res) => {
-    console.log("server reached");
+// uploadImage.single("image") intercepts the multipart image data and creates req.file.
+categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), async (req, res) => {
+    const { categoryId } = req.params;
+    const userId = req.user.id; // Fixes the ReferenceError bug!
+
     try {
-        const newItem = new ItemCards(req.body);
+        // 1. Structural Validation check
+        if (!req.file) {
+            return res.status(400).json({ error: "Please select an image file to upload." });
+        }
+
+        // 2. Build a unique filename reference paths for Firebase Storage
+        const uniqueFilename = `${Date.now()}_${userId}_${req.file.originalname.replace(/\s+/g, "_")}`;
+        const fileRef = bucket.file(`closet-items/${uniqueFilename}`);
+
+        // 3. Stream the Multer RAM buffer directly up to Firebase
+        await fileRef.save(req.file.buffer, {
+            metadata: { contentType: req.file.mimetype },
+            public: true // Enables viewing via a regular public URL string
+        });
+
+        // 4. Construct the permanent public asset link string
+        const permanentImageUrl = `https://storage.googleapis.com/${bucket.name}/${fileRef.name}`;
+
+        // 5. Combine user metadata and the new cloud image link into your schema payload
+        const newItemData = {
+            ...req.body,
+            category: categoryId,
+            userId: userId,
+            file: permanentImageUrl, // Tiny string instead of massive raw base64 data!
+            filePath: fileRef.name // Saves 'closet-items/uniqueFilename.jpg'
+        };
+
+        // 6. Record the document cleanly inside MongoDB
+        const newItem = new ItemCards(newItemData);
         const savedItem = await newItem.save();
+
+        // 7. Invalidate the Redis cache for this user's category items
+        await redisClient.del(`user:${userId}:category:${categoryId}:items`);
         
-        //In Express, .json() only takes one argument (the data you want to send).
+        // In Express, .json() only takes one argument (the data you want to send).
         res.status(201).json(savedItem);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -184,17 +257,6 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         } catch (error) {   
             console.error("AI generation failed, continue database sync")
         }
-        
-        // // findByIdAndUpdate takes: 1. The ID, 2. The new data, 3. Options
-        // const savedItem = await ItemCards.findByIdAndUpdate(
-        //     itemId, 
-        //     { $set: newData }, // $set updates only the fields sent in req.body
-        //     { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
-        // );
-
-        // if (!savedItem) {
-        //     return res.status(404).json({ error: "Item not found in database" });
-        // }
 
         // Upload this item's information to the index in Pipecone
         await vectorService.upsertItemCard(savedItem)

@@ -7,6 +7,9 @@ import cors from 'cors';
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
 
+// Importing redis
+import { connectRedis } from "./services/redisClient.js";
+
 dotenv.config(); // Load the variables from .env
 const app = express();
 const port = process.env.PORT || 4000 
@@ -28,7 +31,10 @@ const connectDB = async () => {
     try {
         // Wait for the database connection to succeed
         await mongoose.connect(dbURI);
-        console.log("Successfully connected to db");
+        console.log("Successfully connected to MongoDB");
+
+        // After mongodb's connection went through, start connecting to redis
+        await connectRedis();
 
         // If connection is successful, start the server since we dont want our server to listen for request until the connection to db
         app.listen(port, "0.0.0.0");

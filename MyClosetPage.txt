@@ -6,10 +6,10 @@ the summary.
 
 + Paste an image onto the screen and it will automatically be uploaded to the user's closet
 
-
++ Chatbot (partly)
 
 - Unfinished:
-+ Chatbot
+
 
 + Showcase some articles
 

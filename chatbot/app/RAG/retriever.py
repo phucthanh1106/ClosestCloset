@@ -3,12 +3,9 @@ from pinecone import Pinecone
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 from typing import List, Dict, Optional
-import json
-
 
 # Load variables from the .env file into the environment
 load_dotenv()
-
 
 # Config
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
@@ -119,24 +116,22 @@ def generate_response(user_message: str, namespace: str, top_k: int = 5) -> str:
     prompt = build_prompt(user_message, contexts)
     print(prompt)
 
-    # Try OpenAI ChatCompletion as the generator (fallback to returning prompt)
     try:
-        # 1. Initialize model properties
+        # Initialize model properties
         llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash-lite", # Production standard text generation model
+            model="gemini-2.5-flash-lite", 
             temperature=0.2,
             max_output_tokens=512
         )
         
-        # 2. Fire the invocation text string
+        # Fire the invocation text string
         response = llm.invoke(prompt)
         
-        # 3. Extract content directly from LangChain's response object
+        # Extract content directly from LangChain's response object
         return response.content.strip()
         
     except Exception as e:
         print(f"Generation failed: {e}")
-        # If generation isn't possible, return the assembled prompt for debugging
         return prompt
 
 

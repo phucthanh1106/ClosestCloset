@@ -56,15 +56,11 @@ export default function CategoryGrid() {
         
         for (const item of items) {
           if (item.types.includes("image/png") || item.types.includes("image/jpeg") || item.types.includes("image/webp")) {
-            const blob = await item.getType(item.types.find(t => t.startsWith("image/")));
-            const reader = new FileReader();
-            
-            reader.onload = (event) => {
-              // Send the base64 image data to handleAddItem
-              handleAddItem(event.target.result);
-            };
-            
-            reader.readAsDataURL(blob);
+            const imageType = item.types.find(t => t.startsWith("image/"));
+            const blob = await item.getType(imageType);
+            const file = new File([blob], `pasted-image.${imageType.split("/")[1]}`, { type: imageType });
+
+            handleAddItem(file);
             return;
           }
         }
@@ -92,22 +88,22 @@ export default function CategoryGrid() {
     if (!newFile) return;
 
     try {
+      const formData = new FormData();
+      formData.append("image", newFile); // must match uploadImage.single("image")
+      formData.append("category", categoryId);
+      formData.append("description", "");
+      formData.append("userId", user.id);
+      formData.append("brand", "");
+      formData.append("url", "");
+      formData.append("notes", "");
+      formData.append("hasInfo", "false");
+
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Required for the server to "see" your data
           "Authorization": `Bearer ${user.token}`,
         },
-        body: JSON.stringify({
-            file: newFile,
-            category: categoryId, // This comes from your fetchCategory useEffect
-            description: "",      // Initial empty values
-            userId: user.id,
-            brand: "",
-            url: "",
-            notes: "",
-            hasInfo: false
-        }),
+        body: formData,
       });
 
       const savedItem = await response.json();

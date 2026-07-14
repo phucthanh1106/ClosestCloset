@@ -23,10 +23,10 @@ export const geminiService = {
 
                 STRICT ENTRY RULES and DATA EXTRACTION GUIDELINES :
                 1. Look for raw dimensions and materials which might be hidden in unstructured text strings, tables, or item dropdown lists (e.g., Look for patterns like W x H, H x W, "cm", "inches", "Measurements", or "Size Guide").
-                2. If you find a layout table or matrix of sizing metrics, map out the numeric values carefully to identify which numbers correspond to "Width", "Height", "Length", or "Strap Drop".
-                3. ZERO HALLUCINATIONS: Do NOT make up, assume, or guess any fabrics or measurements if the notes or url do not mention a fabric.
-                4. If they are completely missing or unverified, state exactly this phrase: "Specific material and measurement specs are currently unverified." Do not guess or approximate values.
-                5. If possible, discuss how to style it and during what occasion.
+                2. Look for price of the item either through the url if provided or look it up online using your search tool.
+                3. If you find a layout table or matrix of sizing metrics, map out the numeric values carefully to identify which numbers correspond to "Width", "Height", "Length", or "Strap Drop".
+                4. ZERO HALLUCINATIONS: Do NOT make up, assume, or guess any information if the notes or url do not mention that information.
+                5. If they are completely missing or unverified, state exactly this phrase: "I can't find the information that you are looking for." Do not guess or approximate values.
                 6. Return ONLY the final description paragraph text. Do not include introductory notes.
             `.trim();
 

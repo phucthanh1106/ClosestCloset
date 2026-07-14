@@ -4,7 +4,17 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const itemCardSchema = new Schema({
-    file: String,
+    // Hold the public web URL
+    file: {
+        type: String,
+    },
+
+    // Store the exact storage path (e.g., 'closet-items/171829382_shirt.jpg') 
+    // This makes deleting the asset from Firebase later completely effortless!
+    filePath: {
+        type: String,
+        required: true
+    },
 
     category: {
     type: mongoose.Schema.Types.ObjectId, // Tells Mongoose this is a "Link" to another document
