@@ -4,7 +4,7 @@ from api.chatbot_api import chatbot_router
 
 app = FastAPI()
 
-# 🔒 Configure CORS safety gates
+# Configure CORS safety gates
 origins = [
     "http://localhost:5173",  # Your React development port
     "http://127.0.0.1:5173",
@@ -19,5 +19,6 @@ app.add_middleware(
 )
 
 app.include_router(chatbot_router, prefix="/chatbot-api")
+
 
 

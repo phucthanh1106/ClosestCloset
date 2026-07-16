@@ -11,7 +11,7 @@ load_dotenv()
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
+print(GEMINI_API_KEY)
 
 class Retriever:
     def __init__(self, index_name: Optional[str] = None, api_key: Optional[str] = None):
@@ -75,17 +75,19 @@ def embed_text(text: str) -> Optional[List[float]]:
     return None
 
 
-def build_prompt(user_message: str, contexts: List[Dict]) -> str:
+def build_prompt(user_message: str, contexts: List[Dict], chat_history: List[Dict]) -> str:
     """Construct the assistant prompt using the user message and retrieved contexts."""
     # New template: concise, user-focused, instructive for the closet assistant
     header = (
-        "You are ClosestCloset — a wardrobe assistant that helps users manage and query their personal wardrobe data.\\n"
+        "You are Closest Chatbot — a wardrobe assistant that helps users manage and query things about their personal wardrobe data.\\n"
         "RULES:\\n"
         "- Use only the provided context snippets below when answering.\\n"
         "- Keep answers short (1-3 sentences) and suggest one clear next action when helpful.\\n"
+        "- You must refer to the latest conversation history (if there is any) to answer user's message in the case when their message contains so little information.\\n"
         "- When referring to items, include category and a single-line reason.\\n\\n"
     )
 
+    # Getting the context from pinecone
     context_lines = []
     for i, context in enumerate(contexts, start=1):
         meta = context.get("metadata")
@@ -95,25 +97,48 @@ def build_prompt(user_message: str, contexts: List[Dict]) -> str:
 
     context_block = "\n".join(context_lines) if context_lines else "(no context available)"
 
+    # Getting the past history session of the user
+    history_lines = []
+    for message in chat_history:
+        role = message.get("role")
+        content = message.get("content")
+        history_lines.append(f"{role}: {content}")
+
+    history_block = "\n".join(history_lines) if history_lines else "(no chat history yet)"
+
     prompt = (
-            f"{header}Context snippets:\n{context_block}\n\n"
+            f"{header}Item contexts:\n{context_block}\n\n"
+            f"Latest chat history:\n{history_block}\n\n"
             f"User message:\n{user_message}\n\n"
             f"Assistant:\n"
         )
+    
     return prompt
 
 
-def generate_response(user_message: str, namespace: str, top_k: int = 5) -> str:
+def generate_response(user_message: str, namespace: str, chat_history: List[Dict], top_k: int = 5) -> str:
     """Main entry: retrieve relevant contexts and generate a short reply.
     """
     retriever = Retriever()
-    # embed the user message
-    vector = embed_text(user_message)
+
+    # Constructing past messages in the conversation
+    past_messages = ""
+
+    recent_messages = chat_history[-6:]
+    for message in recent_messages:
+        role = message.get("role")
+        content = message.get("content")
+        past_messages += f"{role}: {content}\n"
+
+    past_messages += f"user: {user_message}"
+
+    # Embed the user message + the chat history
+    vector = embed_text(past_messages)
     contexts = []
     if vector and retriever._index:
         contexts = retriever.query_index(vector, namespace=namespace, top_k=top_k)
 
-    prompt = build_prompt(user_message, contexts)
+    prompt = build_prompt(user_message, contexts, chat_history)
     print(prompt)
 
     try:
@@ -132,7 +157,7 @@ def generate_response(user_message: str, namespace: str, top_k: int = 5) -> str:
         
     except Exception as e:
         print(f"Generation failed: {e}")
-        return prompt
+        return f"Sorry, I have encountered an error: {e}! Please try again or contact the owner of the website if you know him!"
 
 
 if __name__ == "__main__":

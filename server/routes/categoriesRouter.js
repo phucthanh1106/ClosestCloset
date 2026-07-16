@@ -5,6 +5,7 @@ import requireAuth from "../middlewares/requireAuth.js"
 import { vectorService } from "../services/vectorStore.js";
 import { geminiService } from "../services/geminiService.js"
 import redisClient from "../services/redisClient.js"
+import { getCache, setCache, deleteCache } from "../services/cacheService.js";
 // Importing firebase
 import { uploadImage } from "../middlewares/uploadImage.js";
 import { bucket } from "../services/firebaseAdmin.js" 
@@ -16,20 +17,20 @@ categoriesRouter.use(requireAuth);
 
 // GET all categories to the dropdown menu
 categoriesRouter.get("/", async (req, res) => {
-    const id = req.user.id;
-    const cacheKey = `user:${id}:categories`;
+    const userId = req.user.id;
+    const cacheKey = `user:${userId}:categories`;
 
     try {
         // Try Redis first
-        const cachedCategories = await redisClient.get(cacheKey);
+        const cachedCategories = await getCache(cacheKey);
 
         if (cachedCategories) {
-            return res.status(200).json(JSON.parse(cachedCategories));
+            return res.status(200).json(cachedCategories);
         }
 
         // Proceed to MongoDB if Redis failed and store that missing information to Redis
-        const categories = await Categories.find({ userId: id }).sort({ createdAt: -1 });
-        await redisClient.set(cacheKey, JSON.stringify(categories), { EX: 3600 });
+        const categories = await Categories.find({ userId: userId }).sort({ createdAt: -1 });
+        await setCache(cacheKey, categories, 600);
 
         res.status(200).json(categories);
     } catch (err) {
@@ -39,13 +40,16 @@ categoriesRouter.get("/", async (req, res) => {
 
 // POST new category to the dropdown menu
 categoriesRouter.post("/", async (req, res) => {
+    const userId = req.user.id;
+    const cacheKey = `user:${userId}:categories`;
+
     try {
         const newCategory = new Categories(req.body);
         // Save the document in the database
         const savedCategory = await newCategory.save();
 
         // Delete the old cache in Redis
-        await redisClient.del(`user:${userId}:categories`);
+        await deleteCache(`user:${userId}:category`);
 
         res.status(201).json(savedCategory);
     } catch (err) {
@@ -58,21 +62,31 @@ categoriesRouter.post("/", async (req, res) => {
 // /:id tells Express: "Anything that comes after the slash is a variable I want to store in req.params
 // If the URL is /api/categories/123, then req.params.id will be 123
 categoriesRouter.delete("/:categoryId", async (req, res) => { 
+    const { categoryId } = req.params;
+    const userId = req.user.id;
+
     try {
         console.log("Delete request received for ID:", req.params.categoryId);
-        const { categoryId } = req.params;
 
+        // Delete the category from mongo and redis
         const deletedCategory = await Categories.findByIdAndDelete(categoryId);
-        const deletedItem = await ItemCards.deleteMany({ category: categoryId})
 
         if (!deletedCategory) {
             return res.status(404).json({ error: "Category not found in database" });
         } 
 
+        await deleteCache(`user:${userId}:categories`);
+
+        // Delete all the items that belong to that category
+        const deletedItem = await ItemCards.deleteMany({ category: categoryId})
+
         if (!deletedItem) {
             return res.status(404).json({ error: "Item not found in database" });
         }
 
+        await deleteCache(`user:${userId}:category:${categoryId}:items`);
+
+        // Once everything went through, send a message back to declare success
         res.status(200).json({ message: "Category deleted successfully" });
     } catch (err) {
         console.error("Category delete error: ", err);
@@ -82,18 +96,22 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
 
 // PUT update a category (e.g., rename)
 categoriesRouter.put('/:categoryId', async (req, res) => {
-    try {
-        const { categoryId } = req.params;
+    const { categoryId } = req.params;
+    const userId = req.user.id;
 
-        const updated = await Categories.findByIdAndUpdate(
-            categoryId,
+    try {
+        const updated = await Categories.findOneAndUpdate(
+            { _id: categoryId, userId: userId }, 
             { $set: req.body },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true } 
         );
 
         if (!updated) {
             return res.status(404).json({ error: 'Category not found' });
         }
+
+        // Delete the old cache in redis
+        await deleteCache(`user:${userId}:categories`);
 
         res.status(200).json(updated);
     } catch (err) {
@@ -110,17 +128,20 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
         const cacheKey = `user:${userId}:category:${categoryId}:items`;
 
         // Try Redis first
-        const cachedItems = await redisClient.get(cacheKey);
+        const cachedItems = await getCache(cacheKey);
 
         if (cachedItems) {
             console.log("CACHE HIT")
-            return res.status(200).json(JSON.parse(cachedItems))
+            return res.status(200).json(cachedItems)
         }
 
         console.log("CACHE MISS");
 
         // If Redis fails, try MongoDB
-        const category = await Categories.findById(categoryId);
+        const category = await Categories.findOne({
+            _id: categoryId,
+            userId: userId
+        });
 
         if (!category) {
             return res.status(404).json({ error: "Category not found" });
@@ -134,7 +155,7 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
         };
 
         // Store this missing item in Redis
-        await redisClient.set(cacheKey, JSON.stringify(response), { EX: 3600 });
+        await setCache(cacheKey, response, 600);
 
         res.status(200).json(response);
     } catch (err) {
@@ -148,6 +169,7 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
 categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), async (req, res) => {
     const { categoryId } = req.params;
     const userId = req.user.id; // Fixes the ReferenceError bug!
+    const cacheKey = `user:${userId}:category:${categoryId}:items`;
 
     try {
         // 1. Structural Validation check
@@ -156,7 +178,7 @@ categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), asy
         }
 
         // 2. Build a unique filename reference paths for Firebase Storage
-        const uniqueFilename = `${Date.now()}_${userId}_${req.file.originalname.replace(/\s+/g, "_")}`;
+        const uniqueFilename = `${userId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, "_")}`;
         const fileRef = bucket.file(`closet-items/${uniqueFilename}`);
 
         // 3. Stream the Multer RAM buffer directly up to Firebase
@@ -182,7 +204,7 @@ categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), asy
         const savedItem = await newItem.save();
 
         // 7. Invalidate the Redis cache for this user's category items
-        await redisClient.del(`user:${userId}:category:${categoryId}:items`);
+        await deleteCache(cacheKey);
         
         // In Express, .json() only takes one argument (the data you want to send).
         res.status(201).json(savedItem);
@@ -195,16 +217,29 @@ categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), asy
 // DELETE an item from the database
 categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
     try {
-        const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
+        const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
         const  userId = req.user.id;
-        const deletedItem = await ItemCards.findOneAndDelete({
+
+        // Find the item that needs to be deleted
+        const itemToDelete = await ItemCards.findOne({
             _id: itemId, 
-            userId: userId  // The 'Lock'
+            userId: userId  // Security Lock
         });
 
-        if (!deletedItem) {
+        if (!itemToDelete) {
             return res.status(404).json({ error: "Item not found in database" });
         }
+
+        // Delete from firebase
+        if (itemToDelete.filePath) {
+            await bucket.file(itemToDelete.filePath).delete();
+        }
+
+        // Now delete the document record from MongoDB
+        await ItemCards.findByIdAndDelete(itemId);
+
+        // Clear redis cache for this category's item
+        await deleteCache(`user:${userId}:category:${categoryId}:items`);
 
         // IMMEDIATELY respond 200 OK back to the frontend network channel
         res.status(200).json({ message: "Item deleted successfully" });
@@ -223,10 +258,12 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
 // PUT (save) an item's form
 // IMPORTANT!!!: PUT is for updating information
 categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
-    console.log("server reached");
+    const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
+    const userId = req.user.id
+    let newData = { ...req.body };
+
     try {
-        const { itemId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
-        let newData = { ...req.body };
+        console.log("server reached");
 
         // RUN THIS FIRST so user changes hit MongoDB instantly (Takes ~10ms)
         const savedItem = await ItemCards.findByIdAndUpdate(
@@ -241,6 +278,7 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
 
         try {
             const geminiParagraph = await geminiService.generateItemContent({ 
+                file: savedItem.file,
                 brand: newData.brand,
                 notes: newData.notes,
                 url: newData.url,
@@ -258,8 +296,16 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
             console.error("AI generation failed, continue database sync")
         }
 
+        // Clear the old Redis cache so the frontend sees the new edits!
+        const cacheKey = `user:${userId}:category:${categoryId}:items`;
+        await deleteCache(cacheKey);
+
+        res.status(200).json(savedItem);
+
         // Upload this item's information to the index in Pipecone
-        await vectorService.upsertItemCard(savedItem)
+        await vectorService.upsertItemCard(savedItem).catch(err => {
+            console.error("Background vector update failure:", err);
+        })
 
         console.log("Item saved successfully");
     } catch (err) {

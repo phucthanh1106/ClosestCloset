@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useOutletContext } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import ItemCard from "./ItemCard.jsx";
@@ -11,8 +11,10 @@ export default function CategoryGrid() {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
+  
   const { categoryId } = useParams(); // reads the dynamic part of URL
   const { user } = useAuthContext();
+  const { handleRenameCategory } = useOutletContext();
 
   useEffect(() => {
     // Getting the items from the server
@@ -64,12 +66,6 @@ export default function CategoryGrid() {
             return;
           }
         }
-
-        // If no image, try to read text (in case user pastes an image URL)
-        // const text = await navigator.clipboard.readText();
-        // if (text && (text.startsWith("http") || text.startsWith("data:"))) {
-        //   handleAddItem(text);
-        // }
       } catch (err) {
         console.error("Paste event failed:", err);
       }
@@ -192,9 +188,10 @@ export default function CategoryGrid() {
       if (response.ok) {
         const updated = await response.json();
         setCategoryName(updated.name);
+        handleRenameCategory(updated);
         setIsEditing(false);
         // Reload so navbar/dropdown syncs
-        window.location.reload();
+        setEditName("");
       } else {
         const err = await response.json();
         console.error('Rename failed', err);

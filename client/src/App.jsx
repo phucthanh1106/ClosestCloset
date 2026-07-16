@@ -41,10 +41,10 @@ export default function App() {
       }
     };
 
-    if (user && location === "/") {
+    if (user) {
       fetchCategories();
     }
-  }, [user, location]);
+  }, [user]);
 
   // Handle creating a new category
   const handleCreateCategory = async (e) => {
@@ -83,6 +83,14 @@ export default function App() {
     } finally {
       setIsCreating(false);
     }
+  };
+
+  const handleRenameCategory = (updatedCategory) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) =>
+        category._id === updatedCategory._id ? updatedCategory : category
+      )
+    );
   };
 
   return (
@@ -198,7 +206,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <Outlet />
+      <Outlet context={{ handleRenameCategory }} />
       {user && <ChatBot />}
     </>
   )

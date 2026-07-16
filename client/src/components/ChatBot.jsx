@@ -5,12 +5,35 @@ import CHATBOT_API_BASE_URL from '../config.js';
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([
+        {
+            id: 1,
+            from: 'bot',
+            message: "Hello! How can I help you?"
+        }
+
+    ]);
     const [input, setInput] = useState('');
+
+    // useRef is a hook that acts as a private, persistent storage box inside your component.
     const messagesRef = useRef(null);
+    const sessionIdRef = useRef(null);
+
+    // Finding the current user 
     const { user } = useAuthContext();
-    
     if (!user) return null;
+
+    // If an user is logged in, generate a chat session id for that user
+    if (!sessionIdRef.current) {
+        let sessionId = sessionStorage.getItem("chatSessionId");
+
+        if (!sessionId) {
+            sessionId = crypto.randomUUID();
+            sessionStorage.setItem("chatSessionId", sessionId);
+        }
+
+        sessionIdRef.current = sessionId;
+    }
 
     useEffect(() => {
         if (messagesRef.current) messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -37,7 +60,10 @@ export default function ChatBot() {
                     'Content-Type': 'application/json', // Required for the server to "see" your data
                     "Authorization": `Bearer ${user.token}`,
                 },
-                body: JSON.stringify(userMsg),
+                body: JSON.stringify({
+                    message: message,
+                    sessionId: sessionIdRef.current
+                }),
             });
 
             const chatbotRep = await response.json();
@@ -150,7 +176,7 @@ export default function ChatBot() {
                                             </div>
                                         ) : (
                                             // #standard message bubble
-                                            <div style={{ background: isUser ? '#00BFA5' : '#F1F3F4', padding: '12px 16px', borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px', color: isUser ? '#FFF' : '#111827', fontSize: 14, lineHeight: 1.5 }}>{m.message}</div>
+                                            <div style={{ background: isUser ? '#00BFA5' : '#F1F3F4', padding: '12px 16px', borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px', color: isUser ? '#FFF' : '#111827', fontSize: 14, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word' }}>{m.message}</div>
                                         )}
                                     </div>
                                 </div>
