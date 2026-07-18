@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
 
   // Fallback to localhost if no specific VITE_PROXY_TARGET is provided
   const proxyTarget = env.VITE_PROXY_TARGET || "http://localhost:4000";
-  const chatbotTarget = env.VITE_PROXY_TARGET || "http://localhost:8000"
+  const chatbotTarget = env.VITE_CHATBOT_PROXY_TARGET || "http://localhost:8000";
 
   return {
     plugins: [react(), tailwindcss()],
