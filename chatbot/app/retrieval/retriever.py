@@ -124,7 +124,7 @@ def generate_response(user_message: str, namespace: str, chat_history: List[Dict
     # Constructing past messages in the conversation
     past_messages = ""
 
-    recent_messages = chat_history[-6:]
+    recent_messages = chat_history[-2:]
     for message in recent_messages:
         role = message.get("role")
         content = message.get("content")
