@@ -21,6 +21,8 @@ services:
     container_name: server_container
     ports:
       - '4000:4000'
+    env_file:          
+      - ./server/.env  
     networks:
       - closestcloset
     environment:
