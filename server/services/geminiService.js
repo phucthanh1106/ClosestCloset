@@ -29,8 +29,6 @@ export const geminiService = {
             const imageMimeType = imageResponse.headers.get("content-type") || "image/jpeg";
 
 
-
-
             const prompt = `
                 You are a fashion assistant.
                 Analyze the following properties and the provided image use your googleSearch tool on the URL (only if provided) to find product specifications to write a cohesive 4-5 sentences summary for this item:

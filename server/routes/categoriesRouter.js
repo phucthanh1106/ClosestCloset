@@ -49,7 +49,7 @@ categoriesRouter.post("/", async (req, res) => {
         const savedCategory = await newCategory.save();
 
         // Delete the old cache in Redis
-        await deleteCache(`user:${userId}:category`);
+        await deleteCache(`user:${userId}:categories`);
 
         res.status(201).json(savedCategory);
     } catch (err) {
@@ -266,11 +266,11 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         console.log("server reached");
 
         // RUN THIS FIRST so user changes hit MongoDB instantly (Takes ~10ms)
-        const savedItem = await ItemCards.findByIdAndUpdate(
-            itemId, 
-            { $set: newData }, // $set updates only the fields sent in req.body
-            { returnDocument: 'after', runValidators: true } // 'new: true' returns the modified document
-        );
+        const savedItem = await ItemCards.findOneAndUpdate(
+            { _id: itemId, userId },
+            { $set: allowedFields },
+            { new: true, runValidators: true }
+        )
 
         if (!savedItem) {
             return res.status(404).json({ error: "Item not found in database" });

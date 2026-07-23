@@ -14,7 +14,7 @@ async def send_prompt(payload: dict, current_user = Depends(get_current_user)):
     # Generating bot's response based on user's messages and past context
     chat_history = await get_messages(user_id, session_id)
 
-    response = generate_response(user_message=user_message, namespace=current_user, chat_history=chat_history)
+    response = await generate_response(user_message=user_message, namespace=current_user, chat_history=chat_history)
 
     # Save both messages after generating the response
     await save_message(user_id, session_id, "user", user_message)
