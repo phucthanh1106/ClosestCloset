@@ -2,23 +2,30 @@ import jwt from "jsonwebtoken";
 import Users from "../models/usersModel.js";
 
 const requireAuth = async (req, res, next) => {
-    // Verify authentication
-    const { authorization } = req.headers;
+    // 1. Read token from req.cookies (populated by cookie-parser)
+    const token = req.cookies.token;
 
-    if (!authorization) {
-        return res.status(401).json({ error: "Authorization token required "})
+    if (!token) {
+        return res.status(401).json({
+            error: "Authentication required",
+        });
     }
-
-    // authorization looks something like "Bearer asdkasndkasndk.nadksni12dn21idna.a1hd9821d9has"
-    const token = authorization.split(" ")[1];
 
     try {
         const {_id} = jwt.verify(token, process.env.SECRET);
 
         // We will find the user by their id 
-        // and then return that id to put it into a property of the request which we can call it anything we want
-        // E.g: req.user or req.userId
-        req.user = await Users.findOne({ _id }).select("_id");
+        // req.user will be something like
+        // {
+        //     "_id": "65f1a2b3c4d5e6f7a8b9c0d1",
+        //     "email": "student@skidmore.edu"
+        // }
+        req.user = await Users.findOne({ _id }).select("_id email");
+
+        if (!req.user) {
+            return res.status(401).json({error: "User not found"});
+        }
+
         next();
     } catch (error) {
         console.log(error);

@@ -2,10 +2,15 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
 import cors from 'cors';
+import cookieParser from "cookie-parser";
+
+// Importing OAuth
+import passport from "./config/passport.js"
 
 // Importing routers
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
+import authRouter from "./routes/authRouter.js";
 
 // Importing redis
 import { connectRedis } from "./services/redisClient.js";
@@ -14,9 +19,14 @@ dotenv.config(); // Load the variables from .env
 const app = express();
 const port = process.env.PORT || 4000 
 
+// 1. Parse incoming cookies into req.cookies
+app.use(cookieParser());
+
 app.use(cors({
-    origin: ["https://closestcloset.onrender.com", "http://localhost:5173/"]
+    origin: ["https://closestcloset.onrender.com", "http://localhost:5173", "http://35.223.214.197:5173/"],
+    credentials: true,
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -24,6 +34,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/auth", authRouter)
 
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;

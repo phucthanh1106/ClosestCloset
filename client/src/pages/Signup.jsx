@@ -14,6 +14,15 @@ export default function Signup() {
     const { signup, isLoading } = useSignup();
     const navigate = useNavigate();
 
+    // These match validator.isStrongPassword() used by the server.
+    const passwordRules = [
+        { label: "At least 8 characters", valid: password.length >= 8 },
+        { label: "At least 1 uppercase letter", valid: /[A-Z]/.test(password) },
+        { label: "At least 1 number", valid: /\d/.test(password) },
+        { label: "At least 1 symbol", valid: /[^A-Za-z0-9]/.test(password) },
+    ];
+    const isPasswordValid = passwordRules.every((rule) => rule.valid);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         toast.dismiss();
@@ -21,6 +30,13 @@ export default function Signup() {
         // Validate passwords match
         if (password !== confirmPassword) {
             toast.error("Passwords do not match", {
+                id: "signup-status"
+            });
+            return;
+        }
+
+        if (!isPasswordValid) {
+            toast.error("Please meet all password requirements", {
                 id: "signup-status"
             });
             return;
@@ -77,6 +93,17 @@ export default function Signup() {
                     </button>
                 </div>
 
+                <ul className="mb-5 ml-3 space-y-1 text-sm">
+                    {passwordRules.map((rule) => (
+                        <li
+                            key={rule.label}
+                            className={rule.valid ? "text-green-400" : "text-red-400"}
+                        >
+                            {rule.valid ? "✓" : "•"} {rule.label}
+                        </li>
+                    ))}
+                </ul>
+
                 <div className="mb-2 relative">
                     <input
                         type={showConfirmPassword ? "text" : "password"}
@@ -109,7 +136,7 @@ export default function Signup() {
 
 
                 <button 
-                    disabled={isLoading || password !== confirmPassword || !password || !confirmPassword || !email}
+                    disabled={isLoading || !isPasswordValid || password !== confirmPassword || !password || !confirmPassword || !email}
                     className="w-full rounded-full font-poppins bg-white py-2 font-semibold text-black transition-colors hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:pointer-events-none"
                 >
                     Sign up

@@ -9,8 +9,8 @@ export default function Navbar({ categories = [] }) {
     const { user } = useAuthContext();
     const navigate = useNavigate();
 
-    const handleClick = () => {
-        logout();
+    const handleClick = async () => {
+        await logout();
         navigate("/");
     }
 

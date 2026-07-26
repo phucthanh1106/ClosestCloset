@@ -16,7 +16,7 @@
 
 // Development: VITE_API_BASE_URL is undefined → uses empty string "" → Vite proxy redirects to localhost:4000
 // Production: VITE_API_BASE_URL = https://closestcloset-backend.onrender.com → uses full URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-const CHATBOT_API_BASE_URL = import.meta.env.VITE_CHATBOT_API_BASE_URL || "";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+export const CHATBOT_API_BASE_URL = import.meta.env.VITE_CHATBOT_API_BASE_URL || "";
 
 export default API_BASE_URL;

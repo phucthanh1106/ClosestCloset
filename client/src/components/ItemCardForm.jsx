@@ -36,8 +36,8 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json', // Required for the server to "see" your data
-                        "Authorization": `Bearer ${user.token}`,
                     },
+                    credentials: "include",
                     body: JSON.stringify({
                         file: item.file,
                         category: categoryId, 

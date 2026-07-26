@@ -1,6 +1,14 @@
 import Users from "../models/usersModel.js"
 import jwt from "jsonwebtoken";
 
+// Configure cookie options
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 3 * 24 * 60 * 60 * 1000,
+};
+
 // Create JWT
 const createToken = (_id) => {
     // Three arguments for sign function:
@@ -8,9 +16,16 @@ const createToken = (_id) => {
     // 2. secret string that only knows by the server (dont public this)
     // 3. Some options for this token
     // i.e. the number of days that the user remains logged in before the token is expired
-    return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d' } )
+    return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d' })
 }
 
+// Return user to frontend
+export const returnUser = async (req, res) => {
+    res.status(200).json({
+        id: req.user._id,
+        email: req.user.email,
+    });
+};
 
 // Login user
 export const loginUser = async (req, res) => {
@@ -22,12 +37,12 @@ export const loginUser = async (req, res) => {
         }
 
         const user = await Users.login(email, password);
-
-        // create token
-        const token = createToken(user._id);
         const id = user._id.toString();
+        const token = createToken(id);
 
-        res.status(200).json({email, id, token});
+        res.cookie("token", token, cookieOptions);
+
+        res.status(200).json({email, id});
     } catch (error) {   
         res.status(400).json({error: error.message})
     }
@@ -49,8 +64,23 @@ export const signupUser = async (req, res) => {
         const token = createToken(user._id);
         const id = user._id.toString();
 
-        res.status(200).json({email, id, token});
+        res.cookie("token", token, cookieOptions);
+
+        res.status(200).json({email, id});
     } catch (error) {   
         res.status(400).json({error: error.message})
     }
 }
+
+// Log out
+export const logoutUser = async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    });
+
+    res.status(200).json({
+        message: "Logged out successfully",
+    });
+};

@@ -14,7 +14,7 @@ import API_BASE_URL from './config.js';
 export default function App() {
   const [typingDone, setTypingDone] = useState(false);
   const location = useLocation().pathname;
-  const { user } = useAuthContext();
+  const { user, dispatch } = useAuthContext();
   const [categories, setCategories] = useState([]);
   const [showCreateInput, setShowCreateInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -27,9 +27,7 @@ export default function App() {
       
       try {
         const response = await fetch(`${API_BASE_URL}/api/categories`, {
-          headers: {
-            "Authorization": `Bearer ${user.token}`
-          }
+          credentials: "include",
         });
 
         if (response.ok) {
@@ -62,8 +60,8 @@ export default function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`
         },
+        credentials: "include",
         body: JSON.stringify({
           name: newCategoryName,
           userId: user.id
@@ -130,13 +128,13 @@ export default function App() {
                   {/* Button to get to login page */}
                   <div className="flex flex-col items-center gap-6">
                       <button
-                        onClick={() => window.location.href = "/signup"}
+                        onClick={() => window.location.href = "/login"}
                         className={
                           `mt-[6vh] font-bold text-5xl text-[oklch(27.1%_0.105_12.094)] bg-[oklch(64.8%_0.2_131.684)]/50 [word-spacing:-0.5em] hover:bg-[oklch(64.8%_0.2_131.684)]/60 px-4 py-2 rounded-full border-4 border-[oklch(27.1%_0.105_12.094)] shadow-2xl
                           ${typingDone ? "opacity-100" : "opacity-0 pointer-events-none"}`
                         }
                       >
-                        SIGN UP
+                        SIGN IN
                       </button>    
                   </div>
                 </>

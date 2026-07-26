@@ -28,9 +28,7 @@ export default function DropdownMenu({ label, items, addBool, basePath, onDelete
         const fetchCategories = async () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/api/categories`, {
-                    headers: {
-                        "Authorization": `Bearer ${user.token}`
-                    }
+                    credentials: "include",
                 });
 
                 if (!res.ok) {
@@ -75,8 +73,8 @@ export default function DropdownMenu({ label, items, addBool, basePath, onDelete
                 method: "POST",
                 headers: { 
                     'Content-Type': 'application/json',
-                    "Authorization": `Bearer ${user.token}`
                 },
+                credentials: "include",
                 body: JSON.stringify({ 
                     name: newCategory,
                     userId: user.id,
@@ -106,9 +104,7 @@ export default function DropdownMenu({ label, items, addBool, basePath, onDelete
         try {
             const response = await fetch(endpoint, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${user.token}`
-                }
+                credentials: "include",
             });
 
             // Check conditions of the response

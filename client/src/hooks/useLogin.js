@@ -17,20 +17,18 @@ export const useLogin = () => {
         const response = await fetch(`${API_BASE_URL}/api/users/login`, {
             method: 'POST',
             headers: {"Content-type": "application/json"},
+            credentials: "include",
             body: JSON.stringify({ email, password })
         })
 
-        console.log
-
         const loginInfo = await response.json();
+        
 
         if (!response.ok) {
             setIsLoading(false);
             // setError(loginInfo.error);
             loginError = loginInfo.error;
         } else {
-            localStorage.setItem("user", JSON.stringify(loginInfo));
-
             // Update context after login successfully
             dispatch({ type: "LOGIN", payload: loginInfo });
             

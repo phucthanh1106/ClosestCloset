@@ -21,9 +21,7 @@ export default function CategoryGrid() {
     const fetchItems = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
-          headers: {
-            "Authorization": `Bearer ${user.token}`
-          }
+          credentials: "include",
         });
 
         if (response.ok) {
@@ -96,9 +94,7 @@ export default function CategoryGrid() {
 
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
-        headers: {
-          "Authorization": `Bearer ${user.token}`,
-        },
+        credentials: "include",
         body: formData,
       });
 
@@ -130,9 +126,7 @@ export default function CategoryGrid() {
       // Fire off the delete request quietly in the background
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards/${itemId}`, {
         method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${user.token}`,
-        }
+        credentials: "include",
       })
 
       if (!response.ok) {
@@ -180,8 +174,8 @@ export default function CategoryGrid() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ name: trimmed }),
       });
 

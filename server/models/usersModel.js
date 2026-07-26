@@ -8,13 +8,24 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     email: {
         type: String,
-        required: true,
         unique: true,
+        lowercase: true, 
+        trim: true
+    },
+    authProvider: {
+        type: String,
+        enum: ["local", "google", "github"],
+        default: "local",
     },
     password: {
         type: String,
-        required: true,
-    }
+        required: function () {
+            return this.authProvider === "local";
+        },
+    },
+    googleId: { 
+        type: String 
+    },
 })
 
 /* -----------------CREATING METHODS FOR THE USER'S MODEL----------------- */

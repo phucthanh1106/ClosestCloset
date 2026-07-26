@@ -2,33 +2,25 @@
 import os
 import jwt
 from dotenv import load_dotenv
-from fastapi import Header, HTTPException, status
+from fastapi import Cookie, HTTPException, status
 
 # Load variables from the .env file into the environment
 load_dotenv()
 
-async def get_current_user(authorization: str = Header(None)):
+async def get_current_user(token: str | None = Cookie(default=None)):
     """
     FastAPI security gatekeeper. Extracts the Bearer JWT token from 
     the incoming headers and decodes it using the shared secret key.
     """
-    # 1. Block if the Authorization header is missing entirely
-    if not authorization:
+    # 1. Block if the token is missing entirely
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authorization token required"
+            detail="Authentication required",
         )
 
     try:
-        # 2. Parse the "Bearer <token>" string format safely
-        token_parts = authorization.split(" ")
-        if len(token_parts) != 2 or token_parts[0].lower() != "bearer":
-            raise ValueError("Malformed authorization header header schema")
-            
-        token = token_parts[1]
-
-        # 3. Verify and decode the token with your shared MERN secret
-        # Uses the default HMAC SHA-256 algorithm (matching jsonwebtoken defaults)
+        # 2. Verify and decode the token with your shared MERN secret
         payload = jwt.decode(
             token, 
             os.environ.get("SECRET"), 

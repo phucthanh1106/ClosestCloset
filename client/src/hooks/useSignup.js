@@ -15,6 +15,7 @@ export const useSignup = () => {
         const response = await fetch(`${API_BASE_URL}/api/users/signup`, {
             method: 'POST',
             headers: {"Content-type": "application/json"},
+            credentials: "include",
             body: JSON.stringify({ email, password })
         })
 
@@ -25,10 +26,6 @@ export const useSignup = () => {
             // setError(signupInfo.error);
             signupError = signupInfo.error;
         } else {
-            // save the user to local storage so that if the user comes back a few hours later
-            // they will still be signed in 
-            localStorage.setItem("user", JSON.stringify(signupInfo));
-
             // update the auth context
             dispatch({ type: 'LOGIN', payload: signupInfo });
             setIsLoading(false);

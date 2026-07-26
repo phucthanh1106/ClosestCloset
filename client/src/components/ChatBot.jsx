@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import { MessageCircle } from 'lucide-react';
-import CHATBOT_API_BASE_URL from '../config.js';
+import { CHATBOT_API_BASE_URL } from '../config.js';
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
@@ -58,8 +58,8 @@ export default function ChatBot() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Required for the server to "see" your data
-                    "Authorization": `Bearer ${user.token}`,
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     message: message,
                     sessionId: sessionIdRef.current

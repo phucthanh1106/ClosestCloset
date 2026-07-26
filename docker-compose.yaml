@@ -5,9 +5,11 @@ services:
     ports:
       - '5173:5173'
     environment:
-      - VITE_API_BASE_URL=            
+      - VITE_API_BASE_URL=          
+      - VITE_CHATBOT_API_BASE_URL=  
       - NODE_ENV=development  
-      - VITE_PROXY_TARGET=http://server_container:4000        
+      - VITE_PROXY_TARGET=http://server_container:4000    
+      - VITE_CHATBOT_PROXY_TARGET=http://chatbot_container:8000
     networks:
       - closestcloset
     volumes:

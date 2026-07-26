@@ -1,4 +1,5 @@
 import { createContext, useReducer, useEffect } from "react";
+import API_BASE_URL from "../config.js";
 
 // The context 
 export const AuthContext = createContext();
@@ -24,11 +25,29 @@ export const AuthContextProvider = ({ children }) => {
     }); // The initial condition is null user since there hasnt been anyone logged in
 
     useEffect(() => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const checkAuth = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+                    credentials: "include",
+                });
 
-        if (user) {
-            dispatch({ type: "LOGIN", payload: user })
-        }
+                if (!response.ok) {
+                    dispatch({ type: "LOGOUT" });
+                    return;
+                }
+
+                const user = await response.json();
+
+                dispatch({
+                    type: "LOGIN",
+                    payload: user,
+                });
+            } catch (error) {
+                dispatch({ type: "LOGOUT" });
+            }
+        };
+
+        checkAuth();
     }, []);
 
     // This will run everytime the state changes

@@ -230,6 +230,9 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
             return res.status(404).json({ error: "Item not found in database" });
         }
 
+        // Clear redis cache for this category's item
+        await deleteCache(`user:${userId}:category:${categoryId}:items`);
+        
         // Delete from firebase
         if (itemToDelete.filePath) {
             await bucket.file(itemToDelete.filePath).delete();
@@ -238,8 +241,6 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
         // Now delete the document record from MongoDB
         await ItemCards.findByIdAndDelete(itemId);
 
-        // Clear redis cache for this category's item
-        await deleteCache(`user:${userId}:category:${categoryId}:items`);
 
         // IMMEDIATELY respond 200 OK back to the frontend network channel
         res.status(200).json({ message: "Item deleted successfully" });
