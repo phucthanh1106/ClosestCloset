@@ -30,7 +30,7 @@ categoriesRouter.get("/", async (req, res) => {
 
         // Proceed to MongoDB if Redis failed and store that missing information to Redis
         const categories = await Categories.find({ userId: userId }).sort({ createdAt: -1 });
-        await setCache(cacheKey, categories, 600);
+        await setCache(cacheKey, categories, 1800);
 
         res.status(200).json(categories);
     } catch (err) {
@@ -64,6 +64,7 @@ categoriesRouter.post("/", async (req, res) => {
 categoriesRouter.delete("/:categoryId", async (req, res) => { 
     const { categoryId } = req.params;
     const userId = req.user.id;
+    const cacheKey = `user:${userId}:category:${categoryId}:items`;
 
     try {
         console.log("Delete request received for ID:", req.params.categoryId);
@@ -84,7 +85,7 @@ categoriesRouter.delete("/:categoryId", async (req, res) => {
             return res.status(404).json({ error: "Item not found in database" });
         }
 
-        await deleteCache(`user:${userId}:category:${categoryId}:items`);
+        await deleteCache(cacheKey);
 
         // Once everything went through, send a message back to declare success
         res.status(200).json({ message: "Category deleted successfully" });
@@ -155,7 +156,7 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
         };
 
         // Store this missing item in Redis
-        await setCache(cacheKey, response, 600);
+        await setCache(cacheKey, response, 1800);
 
         res.status(200).json(response);
     } catch (err) {
@@ -218,12 +219,13 @@ categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), asy
 categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
     try {
         const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
-        const  userId = req.user.id;
+        const userId = req.user.id;
 
         // Find the item that needs to be deleted
-        const itemToDelete = await ItemCards.findOne({
-            _id: itemId, 
-            userId: userId  // Security Lock
+        const itemToDelete = await ItemCards.findOneAndDelete({
+            _id: itemId,
+            userId,
+            category: categoryId
         });
 
         if (!itemToDelete) {
@@ -235,12 +237,15 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
         
         // Delete from firebase
         if (itemToDelete.filePath) {
-            await bucket.file(itemToDelete.filePath).delete();
+            try {
+                await bucket.file(itemToDelete.filePath).delete();
+            } catch (error) {
+                console.error("Firebase file deletion failed:", error);
+            }
         }
 
         // Now delete the document record from MongoDB
         await ItemCards.findByIdAndDelete(itemId);
-
 
         // IMMEDIATELY respond 200 OK back to the frontend network channel
         res.status(200).json({ message: "Item deleted successfully" });
@@ -262,6 +267,14 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
     const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
     const userId = req.user.id
     let newData = { ...req.body };
+
+    const allowedFields = {
+        description: newData.description,
+        brand: newData.brand,
+        url: newData.url,
+        notes: newData.notes,
+        hasInfo: newData.hasInfo
+    };
 
     try {
         console.log("server reached");

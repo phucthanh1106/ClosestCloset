@@ -1,5 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth2";
+import { Strategy as GitHubStrategy } from "passport-github2";
 import Users from "../models/usersModel.js";
 import dotenv from 'dotenv';
 
@@ -10,7 +11,7 @@ passport.use(
     new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.CALLBACK_URL || "http://localhost:4000/api/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:4000/api/auth/google/callback",
         passReqToCallback: true
     },
     // 2. Passport automatically exchanges the Authorization Code for tokens!
@@ -48,6 +49,7 @@ passport.use(
                 await user.save();
 
                 // Return existing user => logs them in
+                // done is a callback function that tells Passport your custom strategy verification logic is finished.
                 return done(null, user);
             } else {
                 // If user does not exist at all, create a new OAuth user
@@ -65,5 +67,53 @@ passport.use(
     }
 ))
 
+passport.use(
+    new GitHubStrategy({
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: process.env.GITHUB_CALLBACK_URL || "http://localhost:4000/api/auth/github/callback",
+        scope: 'user:email' // Needed for accessing email of the user
+    },
+    async (accessToken, refreshToken, profile, done) => {
+        try {
+            const userEmail = profile.emails[0].value;
+            console.log(userEmail)
+
+            if (!userEmail) {
+                return done(new Error("No email found from GitHub profile"), null);
+            }
+
+            let user = await Users.findOne({ githubId: profile.id });
+
+            if (!user) {
+                user = await Users.findOne({ email: userEmail });
+            }
+
+            if (user) {
+                if (!user.githubId) {
+                    user.githubId = profile.id;
+                }
+
+                if (!user.authProvider) {
+                    user.authProvider = "github";
+                }
+
+                await user.save();
+
+                return done(null, user);
+            }
+
+            user = await Users.create({
+                email: userEmail,
+                githubId: profile.id,
+                authProvider: "github",
+            });
+
+            return done(null, user);
+        } catch (error) {
+            return done(error, null);
+        }
+    })
+);
 
 export default passport;

@@ -97,6 +97,9 @@ export default function Login() {
                     </button>
                     <button
                         type="button"
+                        onClick={() => {
+                            window.location.href = `${API_BASE_URL}/api/auth/github`;
+                        }}
                         className="flex w-1/2 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/8 py-2 font-poppins font-semibold text-white transition-colors hover:bg-white/15"
                     >
                         <Github size={18} aria-hidden="true" />

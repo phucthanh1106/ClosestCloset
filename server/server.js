@@ -15,15 +15,17 @@ import authRouter from "./routes/authRouter.js";
 // Importing redis
 import { connectRedis } from "./services/redisClient.js";
 
+// Loading env vars
 dotenv.config(); // Load the variables from .env
-const app = express();
-const port = process.env.PORT || 4000 
 
-// 1. Parse incoming cookies into req.cookies
+// Initiating the app
+const app = express();
+
+// Parse incoming cookies into req.cookies
 app.use(cookieParser());
 
 app.use(cors({
-    origin: ["https://closestcloset.onrender.com", "http://localhost:5173", "http://35.223.214.197:5173/"],
+    origin: ["https://closestcloset.onrender.com", "http://localhost:5173"],
     credentials: true,
 }));
 
@@ -38,6 +40,7 @@ app.use("/api/auth", authRouter)
 
 // Connect to MongoDB
 const dbURI = process.env.MONGO_URI;
+const port = process.env.PORT || 4000 
 const connectDB = async () => {
     try {
         // Wait for the database connection to succeed

@@ -1,5 +1,4 @@
 - for the form, only allow to click save if they have made some changes to the fields
 - otp verification
 - add a limit for message's length and rate limiter using redis (user cant send a lot of message at once) 
-- oauth 2.0
 

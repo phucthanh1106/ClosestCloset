@@ -26,6 +26,9 @@ const userSchema = new Schema({
     googleId: { 
         type: String 
     },
+    githubId: {
+        type: String,
+    },
 })
 
 /* -----------------CREATING METHODS FOR THE USER'S MODEL----------------- */
