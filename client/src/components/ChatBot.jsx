@@ -11,7 +11,6 @@ export default function ChatBot() {
             from: 'bot',
             message: "Hello! How can I help you?"
         }
-
     ]);
     const [input, setInput] = useState('');
 

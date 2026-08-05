@@ -1,13 +1,10 @@
-// Import react router
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider, } from "react-router-dom";
-// Import routes
 import routes from './routes/routes.jsx';
-// Import context
 import { AuthContextProvider } from "./context/AuthContext.jsx";
-
 import './styles/index.css'
+import "./sockets/socketClient.js";
 
 const router = createBrowserRouter(routes);
 

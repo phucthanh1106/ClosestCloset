@@ -16,7 +16,7 @@ const createToken = (_id) => {
     // 2. secret string that only knows by the server (dont public this)
     // 3. Some options for this token
     // i.e. the number of days that the user remains logged in before the token is expired
-    return jwt.sign({_id}, process.env.SECRET, { expiresIn: '3d' })
+    return jwt.sign({_id}, process.env.SECRET, { expiresIn: '1d' })
 }
 
 // Return user to frontend

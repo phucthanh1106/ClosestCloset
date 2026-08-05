@@ -4,9 +4,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Initializing Pinecone index and Gemini Embedding Model
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
 const index = pc.index(process.env.PINECONE_INDEX_NAME);
-
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export const vectorService = {

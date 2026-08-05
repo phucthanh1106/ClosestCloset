@@ -3,15 +3,19 @@ import { useState, useEffect } from "react";
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import ItemCard from "./ItemCard.jsx";
 import AddPhotoButton from "./AddPhotoButton.jsx";
+import ShowProgress from "./ShowProgress.jsx";
 import API_BASE_URL from '../config.js';
+import socket from "../sockets/socketClient.js"
+
 
 export default function CategoryGrid() {
   const [items, setItems] = useState([]); // state to hold items in this category
   const [categoryName, setCategoryName] = useState("");
+  const [liveStatus, setLiveStatus] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
-  
+
   const { categoryId } = useParams(); // reads the dynamic part of URL
   const { user } = useAuthContext();
   const { handleRenameCategory } = useOutletContext();
@@ -77,6 +81,20 @@ export default function CategoryGrid() {
   }, [categoryId, user]);
 
 
+  // WebSocket Live Update
+  useEffect(() => {
+    const handleUploadStatus = (status) => {
+        setLiveStatus(status);
+    };
+
+    socket.on("upload-status", handleUploadStatus);
+
+    return () => {
+        socket.off("upload-status", handleUploadStatus);
+    };
+  }, []);
+
+
   // Handle adding new image to the grid
   const handleAddItem = async (newFile) => {
     if (!newFile) return;
@@ -94,6 +112,9 @@ export default function CategoryGrid() {
 
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
+        headers: {
+          "X-Socket-ID": socket.id,
+        },
         credentials: "include",
         body: formData,
       });
@@ -201,6 +222,8 @@ export default function CategoryGrid() {
 
   return (
     <div className="w-full flex flex-col items-center pt-5">
+      <ShowProgress status={liveStatus} />
+
       {/* Category name with edit button */}
       <div className="w-full flex items-center justify-center pt-5 ml-10">
         {!isEditing ? (

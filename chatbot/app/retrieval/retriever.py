@@ -81,7 +81,7 @@ def build_prompt(user_message: str, contexts: List[Dict], chat_history: List[Dic
     """Construct the assistant prompt using the user message and retrieved contexts."""
     # New template: concise, user-focused, instructive for the closet assistant
     header = (
-        "You are Closest Chatbot — a wardrobe assistant that helps users manage and query things about their personal wardrobe data.\n"
+        "You are Wardrobet — a wardrobe assistant that helps users manage and query things about their personal wardrobe data.\n"
         "RULES:\n"
         "- Use only the provided context snippets below when answering.\n"
         "- Keep answers short (1-3 sentences) and suggest one clear next action when helpful.\n"

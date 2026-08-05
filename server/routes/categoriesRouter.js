@@ -2,6 +2,7 @@ import Categories from "../models/categoriesModel.js";
 import ItemCards from "../models/itemCardsModel.js";
 import express from 'express';
 import requireAuth from "../middlewares/requireAuth.js"
+import { getIO } from "../sockets/socketServer.js";
 import { vectorService } from "../services/vectorStore.js";
 import { geminiService } from "../services/geminiService.js"
 import redisClient from "../services/redisClient.js"
@@ -167,52 +168,75 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
 
 // POST items to a category
 // uploadImage.single("image") intercepts the multipart image data and creates req.file.
-categoriesRouter.post("/:categoryId/itemCards", uploadImage.single("image"), async (req, res) => {
-    const { categoryId } = req.params;
-    const userId = req.user.id; // Fixes the ReferenceError bug!
-    const cacheKey = `user:${userId}:category:${categoryId}:items`;
+categoriesRouter.post("/:categoryId/itemCards", 
+    // Run before Multer processes the uploaded image
+    (req, res, next) => {
+        const socketId = req.headers["x-socket-id"];
 
-    try {
-        // 1. Structural Validation check
-        if (!req.file) {
-            return res.status(400).json({ error: "Please select an image file to upload." });
+
+        if (socketId) {
+            getIO().to(socketId).emit("upload-status", "Uploading");
         }
 
-        // 2. Build a unique filename reference paths for Firebase Storage
-        const uniqueFilename = `${userId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, "_")}`;
-        const fileRef = bucket.file(`closet-items/${uniqueFilename}`);
+        next();
+    },
+    
+    uploadImage.single("image"), 
+    
+    async (req, res) => {
+        const { categoryId } = req.params;
+        const userId = req.user.id; // Fixes the ReferenceError bug!
+        const cacheKey = `user:${userId}:category:${categoryId}:items`;
 
-        // 3. Stream the Multer RAM buffer directly up to Firebase
-        await fileRef.save(req.file.buffer, {
-            metadata: { contentType: req.file.mimetype },
-            public: true // Enables viewing via a regular public URL string
-        });
+        try {
+            // 1. Structural Validation check
+            if (!req.file) {
+                return res.status(400).json({ error: "Please select an image file to upload." });
+            }
 
-        // 4. Construct the permanent public asset link string
-        const permanentImageUrl = `https://storage.googleapis.com/${bucket.name}/${fileRef.name}`;
+            // 2. Build a unique filename reference paths for Firebase Storage
+            const uniqueFilename = `${userId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, "_")}`;
+            const fileRef = bucket.file(`closet-items/${uniqueFilename}`);
 
-        // 5. Combine user metadata and the new cloud image link into your schema payload
-        const newItemData = {
-            ...req.body,
-            category: categoryId,
-            userId: userId,
-            file: permanentImageUrl, // Tiny string instead of massive raw base64 data!
-            filePath: fileRef.name // Saves 'closet-items/uniqueFilename.jpg'
-        };
+            // 3. Stream the Multer RAM buffer directly up to Firebase
+            await fileRef.save(req.file.buffer, {
+                metadata: { contentType: req.file.mimetype },
+                public: true // Enables viewing via a regular public URL string
+            });
 
-        // 6. Record the document cleanly inside MongoDB
-        const newItem = new ItemCards(newItemData);
-        const savedItem = await newItem.save();
+            // 4. Construct the permanent public asset link string
+            const permanentImageUrl = `https://storage.googleapis.com/${bucket.name}/${fileRef.name}`;
 
-        // 7. Invalidate the Redis cache for this user's category items
-        await deleteCache(cacheKey);
-        
-        // In Express, .json() only takes one argument (the data you want to send).
-        res.status(201).json(savedItem);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+            // 5. Combine user metadata and the new cloud image link into your schema payload
+            const newItemData = {
+                ...req.body,
+                category: categoryId,
+                userId: userId,
+                file: permanentImageUrl, // Tiny string instead of massive raw base64 data!
+                filePath: fileRef.name // Saves 'closet-items/uniqueFilename.jpg'
+            };
+
+            // 6. Record the document cleanly inside MongoDB
+            const newItem = new ItemCards(newItemData);
+            const savedItem = await newItem.save();
+
+            // 7. Invalidate the Redis cache for this user's category items
+            await deleteCache(cacheKey);
+
+            // 8. Send a message to client to notify that upload is finished
+            const socketId = req.headers["x-socket-id"];
+
+            if (socketId) {
+                getIO().to(socketId).emit("upload-status", "Done!");
+            }
+            
+            // In Express, .json() only takes one argument (the data you want to send).
+            res.status(201).json(savedItem);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
-});
+);
 
 
 // DELETE an item from the database
@@ -264,9 +288,15 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
 // PUT (save) an item's form
 // IMPORTANT!!!: PUT is for updating information
 categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
+    const socketId = req.headers["x-socket-id"];
     const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
     const userId = req.user.id
     let newData = { ...req.body };
+
+    // WebSocket - 1st phase
+    if (socketId) {
+            getIO().to(socketId).emit("save-status", "Saving to database");
+    }
 
     const allowedFields = {
         description: newData.description,
@@ -284,10 +314,15 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
             { _id: itemId, userId },
             { $set: allowedFields },
             { new: true, runValidators: true }
-        )
+        )   
 
         if (!savedItem) {
             return res.status(404).json({ error: "Item not found in database" });
+        }
+
+        // WebSocket - 2nd phase
+        if (socketId) {
+            getIO().to(socketId).emit("save-status", "Generating item's description");
         }
 
         try {
@@ -303,6 +338,11 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
             
             // Add the newly created paragraph to the Item
             savedItem.geminiDescription = geminiParagraph;
+
+            // WebSocket - 3rd phase
+            if (socketId) {
+                getIO().to(socketId).emit("save-status", "Saving item's description");
+            }
 
             // Save the newly updated item with gemini description to mongodb
             await savedItem.save();
@@ -320,6 +360,11 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         await vectorService.upsertItemCard(savedItem).catch(err => {
             console.error("Background vector update failure:", err);
         })
+
+        // WebSocket - 4th phase
+        if (socketId) {
+            getIO().to(socketId).emit("save-status", "Done!");
+        }
 
         console.log("Item saved successfully");
     } catch (err) {

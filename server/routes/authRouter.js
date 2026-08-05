@@ -6,7 +6,7 @@ const cookieOptions = {
     httpOnly: true, // Prevents client-side JS from reading the cookie
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax", // Helps prevent CSRF attacks
-    maxAge: 3 * 24 * 60 * 60 * 1000,  // Expire in 3 days (matches JWT)
+    maxAge: 1 * 24 * 60 * 60 * 1000,  // Expire in 1 days (matches JWT)
 };
 
 // Set up auth Routing
@@ -22,7 +22,7 @@ authRouter.get("/google",
 authRouter.get("/google/callback",
     // Since we dont use cookie session, set session to false
     passport.authenticate("google", {session: false, failureRedirect: `${process.env.REDIRECT_URL || "http://localhost:5173"}/login`}), (req, res) => {
-        const token = jwt.sign({ _id: req.user._id }, process.env.SECRET, { expiresIn: "3d" });
+        const token = jwt.sign({ _id: req.user._id }, process.env.SECRET, { expiresIn: "1d" });
 
         res.cookie("token", token, cookieOptions);
 
@@ -39,7 +39,7 @@ authRouter.get("/github",
 authRouter.get("/github/callback",
     // Since we dont use cookie session, set session to false
     passport.authenticate("github", {session: false, failureRedirect: "http://localhost:5173/login"}), (req, res) => {
-        const token = jwt.sign({ _id: req.user._id }, process.env.SECRET, { expiresIn: "3d" });
+        const token = jwt.sign({ _id: req.user._id }, process.env.SECRET, { expiresIn: "1d" });
 
         res.cookie("token", token, cookieOptions);
 

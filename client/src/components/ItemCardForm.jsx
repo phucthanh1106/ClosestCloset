@@ -1,9 +1,13 @@
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import API_BASE_URL from "../config.js";
+import socket from "../sockets/socketClient.js";
+import ShowProgress from "./ShowProgress.jsx";
 
 export default function ItemCardForm({ item, onClose, onSave }) {
     const { user } = useAuthContext();
+    const [liveStatus, setLiveStatus] = useState("");
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             description: item.description || "",
@@ -13,6 +17,27 @@ export default function ItemCardForm({ item, onClose, onSave }) {
             hasInfo: item.hasInfo
         }
     });
+
+    useEffect(() => {
+        let closeTimer;
+
+        const handleSaveStatus = (status) => {
+            setLiveStatus(status);
+
+            if (status === "Done!") {
+                closeTimer = setTimeout(() => {
+                    onClose();
+                }, 1000);
+            }
+        };
+
+        socket.on("save-status", handleSaveStatus);
+
+        return () => {
+            socket.off("save-status", handleSaveStatus);
+            clearTimeout(closeTimer);
+        };
+    }, [onClose]);
 
 
     // handleSubmit handles the form; onSubmit handles your app logic
@@ -24,9 +49,8 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                 hasInfo: true
             };
 
-            // Save locally and slam the modal shut immediately
+            // Save locally, but keep the modal open while the server works
             onSave(updatedItem);
-            onClose();
 
             try {
                 const categoryId = item.category.toString();
@@ -36,6 +60,7 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json', // Required for the server to "see" your data
+                        'X-Socket-ID': socket.id,
                     },
                     credentials: "include",
                     body: JSON.stringify({
@@ -70,6 +95,8 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                 onClick={onClose}
             />
+
+            <ShowProgress status={liveStatus} />
 
             {/* MODAL */}
             <div className="relative z-10 w-full max-w-md rounded-xl p-6 bg-white/30 backdrop-blur-lg border border-white/30 shadow-xl">
