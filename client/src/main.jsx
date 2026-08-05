@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider, } from "react-router-dom";
 import routes from './routes/routes.jsx';
 import { AuthContextProvider } from "./context/AuthContext.jsx";
 import './styles/index.css'
-import "./sockets/socketClient.js";
 
 const router = createBrowserRouter(routes);
 

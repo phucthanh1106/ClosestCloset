@@ -112,9 +112,6 @@ export default function CategoryGrid() {
 
       const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}/itemCards`, {
         method: 'POST',
-        headers: {
-          "X-Socket-ID": socket.id,
-        },
         credentials: "include",
         body: formData,
       });

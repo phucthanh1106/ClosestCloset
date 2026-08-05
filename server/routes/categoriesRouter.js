@@ -3,6 +3,7 @@ import ItemCards from "../models/itemCardsModel.js";
 import express from 'express';
 import requireAuth from "../middlewares/requireAuth.js"
 import { getIO } from "../sockets/socketServer.js";
+import { emitProgress } from "../sockets/socketProgress.js";
 import { vectorService } from "../services/vectorStore.js";
 import { geminiService } from "../services/geminiService.js"
 import redisClient from "../services/redisClient.js"
@@ -171,12 +172,7 @@ categoriesRouter.get("/:categoryId/itemCards", async (req, res) => {
 categoriesRouter.post("/:categoryId/itemCards", 
     // Run before Multer processes the uploaded image
     (req, res, next) => {
-        const socketId = req.headers["x-socket-id"];
-
-
-        if (socketId) {
-            getIO().to(socketId).emit("upload-status", "Uploading");
-        }
+        emitProgress(req.user.id, "upload-status", "Uploading")
 
         next();
     },
@@ -197,6 +193,8 @@ categoriesRouter.post("/:categoryId/itemCards",
             // 2. Build a unique filename reference paths for Firebase Storage
             const uniqueFilename = `${userId}_${Date.now()}_${req.file.originalname.replace(/\s+/g, "_")}`;
             const fileRef = bucket.file(`closet-items/${uniqueFilename}`);
+
+            emitProgress(req.user.id, "upload-status", "Saving to database")
 
             // 3. Stream the Multer RAM buffer directly up to Firebase
             await fileRef.save(req.file.buffer, {
@@ -224,15 +222,12 @@ categoriesRouter.post("/:categoryId/itemCards",
             await deleteCache(cacheKey);
 
             // 8. Send a message to client to notify that upload is finished
-            const socketId = req.headers["x-socket-id"];
-
-            if (socketId) {
-                getIO().to(socketId).emit("upload-status", "Done!");
-            }
+            emitProgress(req.user.id, "upload-status", "Done!")
             
             // In Express, .json() only takes one argument (the data you want to send).
             res.status(201).json(savedItem);
         } catch (err) {
+            emitProgress(req.user.id, "upload-status", "Failed!")
             res.status(500).json({ error: err.message });
         }
     }
@@ -288,15 +283,12 @@ categoriesRouter.delete("/:categoryId/itemCards/:itemId", async (req, res) => {
 // PUT (save) an item's form
 // IMPORTANT!!!: PUT is for updating information
 categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
-    const socketId = req.headers["x-socket-id"];
     const { itemId, categoryId } = req.params; // IMPORTANT!!!: Please pay attention to whether it's a function or it's accessing an object's property
     const userId = req.user.id
     let newData = { ...req.body };
 
     // WebSocket - 1st phase
-    if (socketId) {
-            getIO().to(socketId).emit("save-status", "Saving to database");
-    }
+    emitProgress(req.user.id, "save-status", "Request received!")
 
     const allowedFields = {
         description: newData.description,
@@ -308,6 +300,8 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
 
     try {
         console.log("server reached");
+
+        emitProgress(req.user.id, "save-status", "Saving to database")
 
         // RUN THIS FIRST so user changes hit MongoDB instantly (Takes ~10ms)
         const savedItem = await ItemCards.findOneAndUpdate(
@@ -321,9 +315,7 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         }
 
         // WebSocket - 2nd phase
-        if (socketId) {
-            getIO().to(socketId).emit("save-status", "Generating item's description");
-        }
+        emitProgress(req.user.id, "save-status", "Generating item's description")
 
         try {
             const geminiParagraph = await geminiService.generateItemContent({ 
@@ -340,9 +332,8 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
             savedItem.geminiDescription = geminiParagraph;
 
             // WebSocket - 3rd phase
-            if (socketId) {
-                getIO().to(socketId).emit("save-status", "Saving item's description");
-            }
+            emitProgress(req.user.id, "save-status", "Saving item's description")
+
 
             // Save the newly updated item with gemini description to mongodb
             await savedItem.save();
@@ -362,13 +353,13 @@ categoriesRouter.put("/:categoryId/:itemId", async (req, res) => {
         })
 
         // WebSocket - 4th phase
-        if (socketId) {
-            getIO().to(socketId).emit("save-status", "Done!");
-        }
+        emitProgress(req.user.id, "save-status", "Done!")
+
 
         console.log("Item saved successfully");
     } catch (err) {
         console.error("Item save error: ", err);
+        emitProgress(req.user.id, "save-status", "Failed!")
         res.status(500).json({ err: err.message });
     }
 });

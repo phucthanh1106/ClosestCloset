@@ -1,4 +1,5 @@
 import { createContext, useReducer, useEffect } from "react";
+import socket from "../sockets/socketClient.js";
 import API_BASE_URL from "../config.js";
 
 // The context 
@@ -49,6 +50,17 @@ export const AuthContextProvider = ({ children }) => {
 
         checkAuth();
     }, []);
+
+    // Authenticate socket
+    useEffect(() => {
+        if (state.user) {
+            socket.connect();
+        } else {
+            socket.disconnect();
+        }
+
+        return () => socket.disconnect();
+    }, [state.user]);
 
     // This will run everytime the state changes
     console.log("AuthContext state: ", state);

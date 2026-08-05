@@ -60,7 +60,6 @@ export default function ItemCardForm({ item, onClose, onSave }) {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json', // Required for the server to "see" your data
-                        'X-Socket-ID': socket.id,
                     },
                     credentials: "include",
                     body: JSON.stringify({

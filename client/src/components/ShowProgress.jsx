@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 
 export default function ShowProgress({ status }) {
     const [isVisible, setIsVisible] = useState(false);
+
     const isFinished = status === "Done!";
+    const isFailed = status === "Failed!";
 
     useEffect(() => {
         if (!status) {
@@ -12,14 +14,14 @@ export default function ShowProgress({ status }) {
 
         setIsVisible(true);
 
-        if (isFinished) {
+        if (isFinished || isFailed) {
             const timer = setTimeout(() => {
                 setIsVisible(false);
-            }, 1000);
+            }, 1500);
 
             return () => clearTimeout(timer);
         }
-    }, [status, isFinished]);
+    }, [status, isFinished, isFailed]);
 
     if (!isVisible) return null;
 
@@ -33,22 +35,24 @@ export default function ShowProgress({ status }) {
             </p>
 
             {isFinished ? (
-                <div className="mt-3 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-xl text-white">
+                <div className="mt-3 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-sm text-white">
                     ✓
                 </div>
+            ) : isFailed ? (
+                <div className="mt-3 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-sm text-white">✕</div>
             ) : (
                 <div className="mt-3 flex gap-2">
                     <span
-                        className="h-3 w-3 animate-bounce rounded-full bg-gray-500"
+                        className="h-3 w-3 animate-bounce rounded-full bg-gray-600"
                         style={{ animationDelay: "-0.3s" }}
                     />
 
                     <span
-                        className="h-3 w-3 animate-bounce rounded-full bg-gray-500"
+                        className="h-3 w-3 animate-bounce rounded-full bg-gray-600"
                         style={{ animationDelay: "-0.15s" }}
                     />
 
-                    <span className="h-3 w-3 animate-bounce rounded-full bg-gray-500" />
+                    <span className="h-3 w-3 animate-bounce rounded-full bg-gray-600" />
                 </div>
             )}
         </div>

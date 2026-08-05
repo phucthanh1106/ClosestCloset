@@ -3,9 +3,6 @@
 A digital closet app where you can store, organize, and manage all your favorite pieces of clothing in one place. No more scrolling through endless Instagram posts or screenshots to remember what you bought—just open the app and find your fit!
 
 **Live Demo:** [https://closestcloset.onrender.com/](https://closestcloset.onrender.com/)
-
-!!! Since I'm still lazy to change the UI, you need to know that your password must be at least 8 characters with at least 1 special symbol (!,@,%,...), a number and an uppercase letter (I'm not really sure but my password contained all of that and it worked).
-
 ---
 
 ## 🎯 What's This About?
@@ -82,5 +79,4 @@ ClosestCloset/
 
 ## 💡 Why I Built This
 
-Honestly? I'm broke hehe
 
