@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const cookieOptions = {
     httpOnly: true, // Prevents client-side JS from reading the cookie
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax", // Helps prevent CSRF attacks
+    sameSite: "none", // Helps prevent CSRF attacks
     maxAge: 1 * 24 * 60 * 60 * 1000,  // Expire in 1 days (matches JWT)
 };
 
@@ -38,7 +38,7 @@ authRouter.get("/github",
 
 authRouter.get("/github/callback",
     // Since we dont use cookie session, set session to false
-    passport.authenticate("github", {session: false, failureRedirect: "http://localhost:5173/login"}), (req, res) => {
+    passport.authenticate("github", {session: false, failureRedirect: `${process.env.REDIRECT_URL || "http://localhost:5173"}/login`}), (req, res) => {
         const token = jwt.sign({ _id: req.user._id }, process.env.SECRET, { expiresIn: "1d" });
 
         res.cookie("token", token, cookieOptions);
@@ -46,7 +46,6 @@ authRouter.get("/github/callback",
         res.redirect(`${process.env.REDIRECT_URL || "http://localhost:5173"}`);
     }
 );
-
 
 
 export default authRouter;
