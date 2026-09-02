@@ -6,11 +6,12 @@ from fastapi import Cookie, HTTPException, status
 
 # Load variables from the .env file into the environment
 load_dotenv()
-
+ 
+# Cookie(default=None): is a FastAPI Dependency that tells FastAPI to look in the request's cookies
 async def get_current_user(token: str | None = Cookie(default=None)):
     """
     FastAPI security gatekeeper. Extracts the Bearer JWT token from 
-    the incoming headers and decodes it using the shared secret key.
+    the incoming cookie and decodes it using the shared secret key.
     """
     # 1. Block if the token is missing entirely
     if not token:

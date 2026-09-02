@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuthContext } from "../hooks/useAuthContext.js";
 import { MessageCircle } from 'lucide-react';
-import { CHATBOT_API_BASE_URL } from '../config.js';
+import { API_BASE_URL } from '../config.js';
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
@@ -9,7 +9,7 @@ export default function ChatBot() {
         {
             id: 1,
             from: 'bot',
-            message: "Hello! How can I help you?"
+            message: "Hi! I'm Wardrobet, your personal fashion and closet assistant. How can I help you today?"
         }
     ]);
     const [input, setInput] = useState('');
@@ -53,7 +53,7 @@ export default function ChatBot() {
         setInput('');
 
         try {
-            const response = await fetch(`${CHATBOT_API_BASE_URL}/chatbot-api/messages`, {
+            const response = await fetch(`${API_BASE_URL}/api/chatbot/messages`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Required for the server to "see" your data
@@ -141,7 +141,7 @@ export default function ChatBot() {
                             {/* #header logo */}
                             <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: 18 }}>❖</div>
                             {/* #header title */}
-                            <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>Chatbot</div>
+                            <div style={{ color: '#fff', fontWeight: 700, fontSize: 18 }}>Wardrobet</div>
                         </div>
                         <div>
                             {/* #header close button */}
@@ -158,7 +158,7 @@ export default function ChatBot() {
                                 <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: isUser ? 'flex-end' : 'flex-start', width: '100%' }}>
                                     
                                     {/* #sender identity label */}
-                                    {!isUser && <div style={{ color: '#6B7280', fontSize: 12, marginBottom: 2, marginLeft: 50 }}>Chatbot</div>}
+                                    {!isUser && <div style={{ color: '#6B7280', fontSize: 12, marginBottom: 2, marginLeft: 50 }}>Wardrobet</div>}
 
                                     <div style={{ display: 'flex', gap: 8, maxWidth: '85%', alignItems: 'flex-end' }}>
                                         

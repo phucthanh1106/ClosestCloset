@@ -37,7 +37,7 @@ class Retriever:
 
         try:
             # Run the synchronous index.query in a separate thread!
-            response = await self._index.query(vector=vector, top_k=top_k, include_metadata=True, namespace=namespace)
+            response = await asyncio.to_thread.query(vector=vector, top_k=top_k, include_metadata=True, namespace=namespace)
             matches = response.matches or []
             results = []
             for m in matches:

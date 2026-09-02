@@ -2,11 +2,14 @@ import express from "express";
 import passport from "../config/passport.js";
 import jwt from "jsonwebtoken";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// Configure cookie options
 const cookieOptions = {
-    httpOnly: true, // Prevents client-side JS from reading the cookie
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none", // Helps prevent CSRF attacks
-    maxAge: 1 * 24 * 60 * 60 * 1000,  // Expire in 1 days (matches JWT)
+    httpOnly: true, // prevent client side js from reading the cookie
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax" , // lax for development where client and server same domain but none
+    maxAge: 3 * 24 * 60 * 60 * 1000,
 };
 
 // Set up auth Routing

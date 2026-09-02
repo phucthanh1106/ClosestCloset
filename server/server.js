@@ -11,6 +11,7 @@ import passport from "./config/passport.js"
 import categoriesRouter from "./routes/categoriesRouter.js";
 import usersRouter from "./routes/usersRouter.js";
 import authRouter from "./routes/authRouter.js";
+import chatbotRouter from "./routes/chatbotRouter.js";
 
 // External services
 import { connectRedis } from "./services/redisClient.js";
@@ -43,7 +44,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Mounting middlewares
 app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter);
+app.use("/api/chatbot", chatbotRouter);
 
 // Starting the server with connecting to mongoDB and Redis
 const dbURI = process.env.MONGO_URI;

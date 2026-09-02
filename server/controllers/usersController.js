@@ -1,11 +1,13 @@
 import Users from "../models/usersModel.js"
 import jwt from "jsonwebtoken";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 // Configure cookie options
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax" , // lax for development where client and server same domain but none
     maxAge: 3 * 24 * 60 * 60 * 1000,
 };
 
