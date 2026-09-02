@@ -8,6 +8,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",  # Your React development port
     "http://localhost:4000",
+    "https://closest-closet-server-582372604054.us-central1.run.app",
     "http://127.0.0.1:5173",
 ]
 
