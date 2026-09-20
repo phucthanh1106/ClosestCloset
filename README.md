@@ -52,31 +52,6 @@ npm run dev
 
 The app should open at `http://localhost:5173` (or whatever Vite tells you).
 
----
 
-## 🏗️ Project Structure
-
-```
-ClosestCloset/
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── components/    # Reusable React components
-│   │   ├── pages/         # Page components (Login, Signup, MyCloset, etc.)
-│   │   ├── hooks/         # Custom React hooks (useLogin, useSignup, etc.)
-│   │   ├── context/       # React Context for auth state
-│   │   └── styles/        # Tailwind CSS configuration
-│   └── vite.config.js
-│
-└── server/                 # Express backend
-    ├── controllers/       # Business logic
-    ├── models/           # MongoDB schemas
-    ├── routes/           # API routes
-    ├── middlewares/      # Middleware (auth, etc.)
-    └── server.js         # Main server file
-```
-
---- 
-
-## 💡 Why I Built This
 
 
