@@ -28,6 +28,43 @@ def get_chat_key(user_id: str, session_id: str):
     return f"chat:{user_id}:session:{session_id}"
 
 
+# Limit each user to 3 requests during a 60-second period and 20 requests during a 24-hour period
+async def check_rate_limit(user_id: str, minute_lim, day_lim):
+    minute_key = f"chat:{user_id}:rate:minute"
+    day_key = f"chat:{user_id}:rate:day"
+
+    # Count requests during the current minute
+    minute_count = await redis_client.incr(minute_key) # incr increases the counter.
+    if minute_count == 1:
+        await redis_client.expire(minute_key, 60) # automatically deletes the counter after its time window
+
+    if minute_count > minute_lim:
+        return f"You can only send {minute_lim} messages per minute."
+
+    # Count requests during the current day
+    day_count = await redis_client.incr(day_key)
+    if day_count == 1:
+        await redis_client.expire(day_key, 86400) # automatically deletes the counter after its time window
+
+    if day_count > day_lim:
+        return f"You reached your daily limit of {day_lim} messages."
+
+    return None
+
+
+# Lock this user while one chatbot request is running
+# nx=True (Not eXists): It tells Redis to create this key ONLY IF it doesn't already exist.
+# If the key doesn't exist, Redis creates it and returns True.
+# If the key already exists, Redis does absolutely nothing and returns False (or None).
+async def create_chat_lock(user_id: str):
+    return not await redis_client.set(f"chat:{user_id}:active", "1", nx=True, ex=300) 
+
+
+# Unlock the user when their request finishes
+async def release_chat_lock(user_id: str):
+    await redis_client.delete(f"chat:{user_id}:active")
+
+
 async def save_message(user_id: str, session_id: str, role: str, content: str):
     """Appends a new chat message to the session history in Redis and trims the log.
 
@@ -46,8 +83,6 @@ async def save_message(user_id: str, session_id: str, role: str, content: str):
     # Limiting length of each message
     if not content:
         content = ""
-
-    content = content[:MAX_MESSAGE_CHARS]
 
     message = {
         "role": role,

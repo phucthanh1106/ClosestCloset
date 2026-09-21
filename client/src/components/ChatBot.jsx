@@ -77,15 +77,17 @@ export default function ChatBot() {
                 // Append the chatbot reply into the feed history
                 setMessages((prevMessages) => [...prevMessages, botMsg]);
             } else {
+                // Show FastAPI's specific error message, such as the rate-limit warning
+                const errorMessage = chatbotRep.detail || chatbotRep.error || "Sorry, something went wrong.";
+
                 setMessages((prevMessages) => [
-                    ...prevMessages, 
-                    { id: Date.now() + 1, from: 'bot', message: "Sorry, I'm having trouble reaching the server right now. Please try again!" }
+                    ...prevMessages,
+                    { id: Date.now() + 1, from: "bot", message: errorMessage }
                 ]);
             }
 
 
         } catch (error) {
-            console.error("Network connection error encountered:", error);
             setMessages((prevMessages) => [
                 ...prevMessages, 
                 { id: Date.now() + 1, from: 'bot', message: "Network connection lost. Please check your local servers." }
