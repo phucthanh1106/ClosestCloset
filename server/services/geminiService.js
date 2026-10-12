@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 
-// Create an AI model using your gemini api key
+// Create an AI model using gemini api key
 dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

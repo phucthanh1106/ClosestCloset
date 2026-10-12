@@ -69,7 +69,7 @@ export const vectorService = {
   /**
    * Delete item vector from a user's isolated namespace wall
    */
-  async deleteItemCard(userId, itemId) {
+  async deleteItemVector(userId, itemId) {
     try {
         await index.namespace(userId).deleteOne({ id: itemId.toString() });
         console.log(`Removed item vector ${itemId} from namespace: ${userId}`);
