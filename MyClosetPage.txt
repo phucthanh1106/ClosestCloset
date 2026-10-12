@@ -9,8 +9,6 @@ the summary.
 + Chatbot (partly)
 
 - Unfinished:
-
-
 + Showcase some articles
 
 + When an user clicks on the item card, blur the background and show the item on the left side and description on right side

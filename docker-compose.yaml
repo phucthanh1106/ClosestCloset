@@ -19,7 +19,9 @@ services:
     tty: true
 
   server:
-    build: ./server
+    build: ./server # Tìm file Dockerfile trong thư mục ./server để đóng gói mã nguồn
+    image: closestcloset-server:local
+    command: ["node", "server.js"]
     container_name: server_container
     ports:
       - '4000:4000'
@@ -33,6 +35,17 @@ services:
     depends_on:
       - db
       - redis
+  
+  worker:
+    image: closestcloset-server:local
+    command: ["node", "workers/indexingWorker.js"]
+    env_file:
+      - ./server/.env
+    networks:
+      - closestcloset
+    volumes:
+      - ./server:/app
+      - /app/node_modules
 
   chatbot:
     build: ./chatbot
@@ -52,8 +65,6 @@ services:
     image: mongo:7.0-jammy
     container_name: db_container
     restart: always
-    # environment:
-    #   MONGO_INITDB_DATABASE: closestcloset
     volumes:
       - mongo_data:/data/db
     networks:
